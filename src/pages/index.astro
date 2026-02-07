@@ -56,8 +56,8 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <!-- Revealed Content -->
-  <div id="revealed-content" class="revealed-content fixed inset-0 flex items-center justify-center z-40">
-    <div class="text-center px-8 py-12 max-w-4xl relative z-10 card home-card">
+  <div id="revealed-content" class="revealed-content fixed inset-0 flex items-center justify-center z-40 overflow-y-auto">
+    <div class="text-center px-4 py-8 md:px-8 md:py-12 max-w-[95vw] md:max-w-4xl relative z-10 card home-card my-4">
       <div class="mb-8">
         <img
           src="/images/AZ1A8388.jpg"
@@ -157,11 +157,32 @@ import Layout from '../layouts/Layout.astro';
           });
         }
       </script>
-      <div class="flex flex-wrap justify-center gap-4">
+      <!-- Desktop nav buttons -->
+      <div class="hidden md:flex flex-wrap justify-center gap-4">
         <a href="/personal" class="nav-button">Personal Projects</a>
         <a href="/professional" class="nav-button">Professional Work</a>
         <a href="/socials" class="nav-button">Socials</a>
         <a href="/news" class="nav-button">News & Resources</a>
+      </div>
+
+      <!-- Mobile hamburger menu -->
+      <div class="md:hidden">
+        <button id="mobile-menu-btn" class="nav-button px-4 py-3" aria-label="Open menu">
+          <span class="text-xl">☰</span> Menu
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu overlay -->
+    <div id="mobile-menu" class="mobile-menu-overlay">
+      <div class="mobile-menu-content">
+        <button id="mobile-menu-close" class="mobile-menu-close" aria-label="Close menu">✕</button>
+        <nav class="mobile-nav">
+          <a href="/personal" class="mobile-nav-link">Personal Projects</a>
+          <a href="/professional" class="mobile-nav-link">Professional Work</a>
+          <a href="/socials" class="mobile-nav-link">Socials</a>
+          <a href="/news" class="mobile-nav-link">News & Resources</a>
+        </nav>
       </div>
     </div>
   </div>
@@ -496,6 +517,37 @@ import Layout from '../layouts/Layout.astro';
         welcomeCircle.addEventListener('touchend', stopHold, { passive: false });
         welcomeCircle.addEventListener('touchcancel', stopHold, { passive: false });
       }
+
+      // Mobile menu toggle
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenuClose = document.getElementById('mobile-menu-close');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+      function openMobileMenu() {
+        mobileMenu?.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenu() {
+        mobileMenu?.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      mobileMenuBtn?.addEventListener('click', openMobileMenu);
+      mobileMenuClose?.addEventListener('click', closeMobileMenu);
+
+      // Close menu when clicking a nav link
+      mobileNavLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+
+      // Close menu when clicking outside the content
+      mobileMenu?.addEventListener('click', (e) => {
+        if (e.target === mobileMenu) {
+          closeMobileMenu();
+        }
+      });
     });
   </script>
 </Layout>
