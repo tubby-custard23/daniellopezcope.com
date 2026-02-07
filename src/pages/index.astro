@@ -89,18 +89,24 @@ import Layout from '../layouts/Layout.astro';
         <cite class="block mt-4 text-sm text-white/50 not-italic">
           — Gabriel García Márquez, <span class="italic">Cien años de soledad</span>
         </cite>
+        <p class="mobile-tap-hint md:hidden text-xs text-white/40 mt-2">(tap to translate)</p>
       </blockquote>
 
       <script>
         const wrapper = document.querySelector('.quote-wrapper');
         const line = document.getElementById('translate-line');
         const phrases = document.querySelectorAll('.quote-phrase');
+        const quoteText = document.querySelector('.quote-text');
+        const tapHint = document.querySelector('.mobile-tap-hint');
 
-        if (wrapper && line && phrases.length > 0) {
+        if (wrapper && phrases.length > 0) {
           let isDragging = false;
           let lineX = 0;
+          let isTranslated = false;
+          const isMobile = window.matchMedia('(max-width: 640px)').matches;
 
           function updateTranslation(clientX: number) {
+            if (!line) return;
             const rect = wrapper.getBoundingClientRect();
             const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
             lineX = x;
@@ -121,40 +127,66 @@ import Layout from '../layouts/Layout.astro';
             });
           }
 
-          line.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            line.classList.add('dragging');
-            e.preventDefault();
-          });
-
-          document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-              updateTranslation(e.clientX);
+          // Mobile: tap to toggle translation
+          function toggleTranslation() {
+            isTranslated = !isTranslated;
+            phrases.forEach((phrase) => {
+              const el = phrase as HTMLElement;
+              if (isTranslated) {
+                el.textContent = el.dataset.en || '';
+                el.classList.add('translated');
+              } else {
+                el.textContent = el.dataset.es || '';
+                el.classList.remove('translated');
+              }
+            });
+            // Hide hint after first tap
+            if (tapHint) {
+              tapHint.classList.add('hidden');
             }
-          });
+          }
 
-          document.addEventListener('mouseup', () => {
-            isDragging = false;
-            line.classList.remove('dragging');
-          });
+          if (isMobile && quoteText) {
+            // Mobile: tap quote to translate
+            quoteText.addEventListener('click', toggleTranslation);
+            quoteText.style.cursor = 'pointer';
+          } else if (line) {
+            // Desktop: drag to translate
+            line.addEventListener('mousedown', (e) => {
+              isDragging = true;
+              line.classList.add('dragging');
+              e.preventDefault();
+            });
 
-          // Touch support
-          line.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            line.classList.add('dragging');
-            e.preventDefault();
-          });
+            document.addEventListener('mousemove', (e) => {
+              if (isDragging) {
+                updateTranslation(e.clientX);
+              }
+            });
 
-          document.addEventListener('touchmove', (e) => {
-            if (isDragging && e.touches[0]) {
-              updateTranslation(e.touches[0].clientX);
-            }
-          });
+            document.addEventListener('mouseup', () => {
+              isDragging = false;
+              line.classList.remove('dragging');
+            });
 
-          document.addEventListener('touchend', () => {
-            isDragging = false;
-            line.classList.remove('dragging');
-          });
+            // Touch support for tablets
+            line.addEventListener('touchstart', (e) => {
+              isDragging = true;
+              line.classList.add('dragging');
+              e.preventDefault();
+            });
+
+            document.addEventListener('touchmove', (e) => {
+              if (isDragging && e.touches[0]) {
+                updateTranslation(e.touches[0].clientX);
+              }
+            });
+
+            document.addEventListener('touchend', () => {
+              isDragging = false;
+              line.classList.remove('dragging');
+            });
+          }
         }
       </script>
       <!-- Desktop nav buttons -->

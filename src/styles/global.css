@@ -893,6 +893,37 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
 }
 
+/* Mobile: allow quote to wrap and hide translate line */
+@media (max-width: 640px) {
+  .quote-text {
+    white-space: normal;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  .quote-wrapper {
+    max-width: 90vw;
+  }
+
+  .translate-line {
+    display: none;
+  }
+
+  .quote-phrase.translated {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(181, 131, 90, 0.4);
+  }
+
+  .mobile-tap-hint {
+    transition: opacity 0.5s ease;
+  }
+
+  .mobile-tap-hint.hidden {
+    opacity: 0;
+  }
+}
+
 .quote-phrase {
   display: inline;
   transition: color 0.2s ease;
