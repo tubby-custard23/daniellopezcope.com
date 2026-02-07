@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Environment files (use docker-compose env_file instead)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Development
+README.md
+TEMPLATE_README.md

@@ -1,0 +1,501 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Daniel Lopez-Cope">
+  <!-- Hidden landscape background -->
+  <div id="landscape-bg" class="landscape-bg"></div>
+
+  <!-- Color tint overlay -->
+  <div id="color-overlay" class="color-overlay"></div>
+
+  <!-- Black overlay -->
+  <div id="black-overlay" class="black-overlay"></div>
+
+  <!-- Dark water pool at bottom -->
+  <div id="water-pool" class="water-pool"></div>
+  <div id="water-ripple" class="water-ripple"></div>
+
+  <!-- Fog/Mist layer - hangs over water -->
+  <canvas id="fog-canvas" class="fog-canvas"></canvas>
+
+  <!-- Sunburst pattern - concentric circles with radiating brushstroke rays -->
+  <div id="sunburst" class="sunburst">
+    <!-- Outer red ring with rays -->
+    <div class="sun-ring sun-ring-outer"></div>
+    <!-- Middle orange ring -->
+    <div class="sun-ring sun-ring-middle"></div>
+    <!-- Inner yellow/gold ring -->
+    <div class="sun-ring sun-ring-inner"></div>
+    <!-- Center bright core -->
+    <div class="sun-core"></div>
+    <!-- Radiating rays overlay -->
+    <div class="sun-rays"></div>
+  </div>
+
+  <!-- Welcome Circle Button -->
+  <div id="welcome-screen" class="fixed inset-0 flex items-center justify-center z-30">
+    <div id="welcome-circle" class="welcome-circle">
+      <svg class="progress-ring" viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7A9E9F"/>
+            <stop offset="33%" stop-color="#7D9575"/>
+            <stop offset="66%" stop-color="#B5835A"/>
+            <stop offset="100%" stop-color="#4A3728"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="100" cy="100" r="95"/>
+        <circle id="ring-progress" class="ring-fill" cx="100" cy="100" r="95"/>
+      </svg>
+      <div class="welcome-inner">
+        <h1 class="welcome-text">WELCOME</h1>
+        <p id="typewriter" class="typewriter">hold to enter</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revealed Content -->
+  <div id="revealed-content" class="revealed-content fixed inset-0 flex items-center justify-center z-40">
+    <div class="text-center px-8 py-12 max-w-4xl relative z-10 card home-card">
+      <div class="mb-8">
+        <img
+          src="/images/AZ1A8388.jpg"
+          alt="Daniel Lopez-Cope"
+          class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover mx-auto border-4 border-white/30 shadow-2xl"
+        />
+      </div>
+      <h1 class="text-4xl md:text-6xl tracking-wider text-white mb-2 drop-shadow-lg">
+        Daniel Lopez-Cope
+      </h1>
+      <p class="text-sm text-white/50 italic mb-6">he/him/his</p>
+      <blockquote class="quote-container mb-12" id="quote-container">
+        <div class="quote-wrapper">
+          <div class="translate-line" id="translate-line">
+            <span class="translate-hint">drag →</span>
+          </div>
+          <p class="quote-text text-sm md:text-base text-white/80 font-light italic drop-shadow" id="quote"><!--
+            --><span class="quote-phrase" data-es="&quot;A mí" data-en="&quot;It's">"A mí</span><!--
+            --><span class="quote-phrase" data-es=" me bastaría" data-en=" enough for me"> me bastaría</span><!--
+            --><span class="quote-phrase" data-es=" con estar" data-en=" to be"> con estar</span><!--
+            --><span class="quote-phrase" data-es=" seguro" data-en=" sure"> seguro</span><!--
+            --><span class="quote-phrase" data-es=" de que" data-en=" that"> de que</span><!--
+            --><span class="quote-phrase" data-es=" tú y yo" data-en=" you and I"> tú y yo</span><!--
+            --><span class="quote-phrase" data-es=" existimos" data-en=" exist"> existimos</span><!--
+            --><span class="quote-phrase" data-es=" en este" data-en=" at this"> en este</span><!--
+            --><span class="quote-phrase" data-es=" momento.&quot;" data-en=" moment.&quot;"> momento."</span>
+          </p>
+        </div>
+        <cite class="block mt-4 text-sm text-white/50 not-italic">
+          — Gabriel García Márquez, <span class="italic">Cien años de soledad</span>
+        </cite>
+      </blockquote>
+
+      <script>
+        const wrapper = document.querySelector('.quote-wrapper');
+        const line = document.getElementById('translate-line');
+        const phrases = document.querySelectorAll('.quote-phrase');
+
+        if (wrapper && line && phrases.length > 0) {
+          let isDragging = false;
+          let lineX = 0;
+
+          function updateTranslation(clientX: number) {
+            const rect = wrapper.getBoundingClientRect();
+            const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+            lineX = x;
+            line.style.left = `${x}px`;
+
+            phrases.forEach((phrase) => {
+              const el = phrase as HTMLElement;
+              const phraseRect = el.getBoundingClientRect();
+              const phraseCenter = phraseRect.left + phraseRect.width / 2 - rect.left;
+
+              if (x > phraseCenter) {
+                el.textContent = el.dataset.en || '';
+                el.classList.add('translated');
+              } else {
+                el.textContent = el.dataset.es || '';
+                el.classList.remove('translated');
+              }
+            });
+          }
+
+          line.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            line.classList.add('dragging');
+            e.preventDefault();
+          });
+
+          document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+              updateTranslation(e.clientX);
+            }
+          });
+
+          document.addEventListener('mouseup', () => {
+            isDragging = false;
+            line.classList.remove('dragging');
+          });
+
+          // Touch support
+          line.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            line.classList.add('dragging');
+            e.preventDefault();
+          });
+
+          document.addEventListener('touchmove', (e) => {
+            if (isDragging && e.touches[0]) {
+              updateTranslation(e.touches[0].clientX);
+            }
+          });
+
+          document.addEventListener('touchend', () => {
+            isDragging = false;
+            line.classList.remove('dragging');
+          });
+        }
+      </script>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/personal" class="nav-button">Personal Projects</a>
+        <a href="/professional" class="nav-button">Professional Work</a>
+        <a href="/socials" class="nav-button">Socials</a>
+        <a href="/news" class="nav-button">News & Resources</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const welcomeCircle = document.getElementById('welcome-circle');
+      const welcomeScreen = document.getElementById('welcome-screen');
+      const blackOverlay = document.getElementById('black-overlay');
+      const fogCanvas = document.getElementById('fog-canvas') as HTMLCanvasElement;
+      const waterPool = document.getElementById('water-pool');
+      const waterRipple = document.getElementById('water-ripple');
+      const sunburst = document.getElementById('sunburst');
+      const landscapeBg = document.getElementById('landscape-bg');
+      const colorOverlay = document.getElementById('color-overlay');
+      const revealedContent = document.getElementById('revealed-content');
+      const ringProgress = document.getElementById('ring-progress');
+
+      let holdProgress = 0;
+      let holdInterval: ReturnType<typeof setInterval> | null = null;
+      let isHolding = false;
+      const holdDuration = 2500;
+      const updateInterval = 16;
+      const circumference = 2 * Math.PI * 95;
+
+      // ============ FOG SYSTEM - MIST AT MOUNTAIN BASE ============
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let fogDissipated = false;
+      let fogOpacity = 1;
+      let sunriseProgress = 0; // Controlled by hold progress
+
+      // Fog layer class - creates horizontal bands of mist
+      class FogLayer {
+        points: {x: number, y: number, baseX: number, baseY: number, offset: number}[] = [];
+        y: number;
+        height: number;
+        opacity: number;
+        speed: number;
+
+        constructor(canvasWidth: number, y: number, height: number, opacity: number) {
+          this.y = y;
+          this.height = height;
+          this.opacity = opacity;
+          this.speed = (Math.random() - 0.5) * 0.2;
+
+          // Create control points for the fog shape
+          const pointCount = 12;
+          for (let i = 0; i <= pointCount; i++) {
+            const x = (i / pointCount) * (canvasWidth + 200) - 100;
+            this.points.push({
+              x: x,
+              y: y + (Math.random() - 0.5) * height * 0.5,
+              baseX: x,
+              baseY: y + (Math.random() - 0.5) * height * 0.5,
+              offset: Math.random() * Math.PI * 2
+            });
+          }
+        }
+
+        update(mouseX: number, mouseY: number, time: number, canvasWidth: number, sunrise: number) {
+          // Sunrise pushes fog down and out
+          const sunrisePush = sunrise * 100;
+
+          this.points.forEach((point, i) => {
+            // Natural wave movement
+            const wave = Math.sin(time * 0.001 + point.offset) * 15;
+            point.baseY = this.y + wave + (Math.sin(time * 0.0005 + i) * 10) + sunrisePush;
+
+            // Mouse influence - push fog away
+            const dx = mouseX - point.x;
+            const dy = mouseY - point.baseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const influenceRadius = 200;
+
+            if (distance < influenceRadius && !fogDissipated) {
+              const force = (1 - distance / influenceRadius) * 80;
+              const angle = Math.atan2(dy, dx);
+              point.y = point.baseY - Math.sin(angle) * force;
+              point.x = point.baseX - Math.cos(angle) * force * 0.3;
+            } else {
+              // Smoothly return
+              point.y += (point.baseY - point.y) * 0.05;
+              point.x += (point.baseX - point.x) * 0.05;
+            }
+          });
+
+          // Drift horizontally - faster when sun is rising (wind effect)
+          const driftSpeed = this.speed + (sunrise * 0.5);
+          this.points.forEach(p => {
+            p.baseX += driftSpeed;
+            if (p.baseX > canvasWidth + 100) p.baseX = -100;
+            if (p.baseX < -100) p.baseX = canvasWidth + 100;
+          });
+        }
+
+        draw(ctx: CanvasRenderingContext2D, canvasHeight: number, sunriseFade: number = 1) {
+          if (fogDissipated && fogOpacity <= 0) return;
+
+          const displayOpacity = this.opacity * fogOpacity * sunriseFade;
+          if (displayOpacity <= 0.01) return;
+
+          // Create gradient for this fog layer
+          const gradient = ctx.createLinearGradient(0, this.y - this.height, 0, this.y + this.height);
+          gradient.addColorStop(0, `rgba(120, 120, 130, 0)`);
+          gradient.addColorStop(0.3, `rgba(140, 140, 150, ${displayOpacity * 0.4})`);
+          gradient.addColorStop(0.5, `rgba(160, 160, 170, ${displayOpacity * 0.6})`);
+          gradient.addColorStop(0.7, `rgba(140, 140, 150, ${displayOpacity * 0.4})`);
+          gradient.addColorStop(1, `rgba(120, 120, 130, 0)`);
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.moveTo(-100, canvasHeight);
+
+          // Draw smooth curve through points
+          for (let i = 0; i < this.points.length - 1; i++) {
+            const xc = (this.points[i].x + this.points[i + 1].x) / 2;
+            const yc = (this.points[i].y + this.points[i + 1].y) / 2;
+            ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
+          }
+
+          ctx.lineTo(ctx.canvas.width + 100, canvasHeight);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      // Initialize fog layers
+      let fogLayers: FogLayer[] = [];
+
+      function initFog() {
+        if (!fogCanvas) return;
+        const ctx = fogCanvas.getContext('2d');
+        if (!ctx) return;
+
+        fogCanvas.width = window.innerWidth;
+        fogCanvas.height = window.innerHeight;
+
+        fogLayers = [];
+        const h = fogCanvas.height;
+
+        // Create fog layers at the bottom - like mist at mountain base
+        fogLayers.push(new FogLayer(fogCanvas.width, h * 0.65, 100, 0.25));
+        fogLayers.push(new FogLayer(fogCanvas.width, h * 0.72, 120, 0.4));
+        fogLayers.push(new FogLayer(fogCanvas.width, h * 0.78, 140, 0.5));
+        fogLayers.push(new FogLayer(fogCanvas.width, h * 0.85, 160, 0.6));
+        fogLayers.push(new FogLayer(fogCanvas.width, h * 0.92, 120, 0.45));
+      }
+
+      let fogTime = 0;
+      function animateFog() {
+        if (!fogCanvas) return;
+        const ctx = fogCanvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, fogCanvas.width, fogCanvas.height);
+        fogTime += 16;
+
+        // Fade out if dissipating
+        if (fogDissipated) {
+          fogOpacity -= 0.02;
+          if (fogOpacity <= 0) {
+            fogOpacity = 0;
+            return;
+          }
+        }
+
+        // Sunrise pushes fog away - reduce opacity and push down
+        const sunriseFade = 1 - (sunriseProgress * 0.8);
+
+        fogLayers.forEach(layer => {
+          layer.update(mouseX, mouseY, fogTime, fogCanvas.width, sunriseProgress);
+          layer.draw(ctx, fogCanvas.height, sunriseFade);
+        });
+
+        requestAnimationFrame(animateFog);
+      }
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      window.addEventListener('resize', () => {
+        if (fogCanvas) {
+          fogCanvas.width = window.innerWidth;
+          fogCanvas.height = window.innerHeight;
+          initFog();
+        }
+      });
+
+      initFog();
+      animateFog();
+
+      function updateProgress(progress: number) {
+        // Update ring
+        if (ringProgress) {
+          const offset = circumference - (progress / 100) * circumference;
+          ringProgress.style.strokeDashoffset = String(offset);
+        }
+
+        // Update sunburst - scale and rotate based on progress
+        if (sunburst) {
+          sunburst.style.setProperty('--progress', String(progress / 100));
+          if (progress > 0) {
+            sunburst.classList.add('active');
+          } else {
+            sunburst.classList.remove('active');
+          }
+        }
+
+        // Reveal landscape gradually - like a sunrise
+        if (landscapeBg) {
+          if (progress > 20) {
+            landscapeBg.classList.add('revealing');
+            // Start revealing after 20% progress, fully visible by 100%
+            const revealProgress = Math.min((progress - 20) / 80, 1);
+            landscapeBg.style.setProperty('--reveal-progress', String(revealProgress * 0.7));
+          } else {
+            landscapeBg.classList.remove('revealing');
+            landscapeBg.style.setProperty('--reveal-progress', '0');
+          }
+        }
+
+        // Update fog - sunrise pushes it away
+        sunriseProgress = progress / 100;
+      }
+
+      function startHold(e: Event) {
+        e.preventDefault();
+        if (isHolding) return;
+        isHolding = true;
+        welcomeCircle?.classList.add('holding');
+
+        holdInterval = setInterval(() => {
+          holdProgress += (updateInterval / holdDuration) * 100;
+          updateProgress(Math.min(holdProgress, 100));
+
+          if (holdProgress >= 100) {
+            completeHold();
+          }
+        }, updateInterval);
+      }
+
+      function stopHold(e: Event) {
+        e.preventDefault();
+        if (!isHolding) return;
+        isHolding = false;
+        welcomeCircle?.classList.remove('holding');
+
+        if (holdInterval) {
+          clearInterval(holdInterval);
+          holdInterval = null;
+        }
+
+        let resetProgress = holdProgress;
+        holdProgress = 0;
+        const resetInterval = setInterval(() => {
+          resetProgress -= 4;
+          if (resetProgress <= 0) {
+            resetProgress = 0;
+            clearInterval(resetInterval);
+            // Remove revealing class when fully reset
+            landscapeBg?.classList.remove('revealing');
+            sunriseProgress = 0;
+          }
+          updateProgress(resetProgress);
+        }, 16);
+      }
+
+      function completeHold() {
+        if (holdInterval) {
+          clearInterval(holdInterval);
+          holdInterval = null;
+        }
+        isHolding = false;
+
+        // 1. Sunburst fills and pulses
+        sunburst?.classList.add('complete');
+
+        // 2. Fade welcome circle
+        setTimeout(() => {
+          welcomeCircle?.classList.add('fade-out');
+        }, 300);
+
+        // 3. Fade sunburst and dissipate fog
+        setTimeout(() => {
+          sunburst?.classList.add('fade-out');
+          fogDissipated = true;
+          if (fogCanvas) fogCanvas.classList.add('dissipate');
+          waterPool?.classList.add('fade-out');
+          waterRipple?.classList.add('fade-out');
+        }, 600);
+
+        // 4. Fully reveal landscape (it's already partially visible from sunburst)
+        setTimeout(() => {
+          blackOverlay?.classList.add('fade-out');
+          landscapeBg?.classList.remove('revealing');
+          landscapeBg?.classList.add('revealed');
+          colorOverlay?.classList.add('show');
+        }, 900);
+
+        // 5. Hide welcome screen
+        setTimeout(() => {
+          if (welcomeScreen) welcomeScreen.style.display = 'none';
+        }, 1100);
+
+        // 6. Show content
+        setTimeout(() => {
+          revealedContent?.classList.add('show');
+          sessionStorage.setItem('introSeen', 'true');
+        }, 1300);
+      }
+
+      // Skip intro if already seen
+      if (sessionStorage.getItem('introSeen')) {
+        welcomeScreen?.remove();
+        sunburst?.remove();
+        blackOverlay?.classList.add('fade-out');
+        fogDissipated = true;
+        if (fogCanvas) fogCanvas.style.display = 'none';
+        if (waterPool) waterPool.style.display = 'none';
+        if (waterRipple) waterRipple.style.display = 'none';
+        landscapeBg?.classList.add('revealed');
+        colorOverlay?.classList.add('show');
+        revealedContent?.classList.add('show');
+      } else if (welcomeCircle) {
+        welcomeCircle.addEventListener('mousedown', startHold);
+        welcomeCircle.addEventListener('mouseup', stopHold);
+        welcomeCircle.addEventListener('mouseleave', stopHold);
+        welcomeCircle.addEventListener('touchstart', startHold, { passive: false });
+        welcomeCircle.addEventListener('touchend', stopHold, { passive: false });
+        welcomeCircle.addEventListener('touchcancel', stopHold, { passive: false });
+      }
+    });
+  </script>
+</Layout>

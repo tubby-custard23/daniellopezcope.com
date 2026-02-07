@@ -1,0 +1,322 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const resources = [
+  {
+    title: "National Suicide Prevention Lifeline",
+    number: "988",
+    description: "24/7 crisis support for anyone in emotional distress",
+    link: "https://988lifeline.org",
+    color: "dusty-teal"
+  },
+  {
+    title: "The Trevor Project",
+    number: "1-866-488-7386",
+    description: "Crisis intervention for LGBTQ+ young people",
+    link: "https://www.thetrevorproject.org",
+    color: "sage"
+  },
+  {
+    title: "Trans Lifeline",
+    number: "1-877-565-8860",
+    description: "Peer support for trans people by trans people",
+    link: "https://translifeline.org",
+    color: "caramel"
+  },
+  {
+    title: "United We Dream",
+    number: "1-844-363-1423",
+    description: "Immigration assistance and know your rights",
+    link: "https://unitedwedream.org",
+    color: "tan"
+  },
+  {
+    title: "RAICES",
+    number: "1-800-XXX-XXXX",
+    description: "Free and low-cost legal services for immigrants",
+    link: "https://www.raicestexas.org",
+    color: "dusty-teal"
+  },
+  {
+    title: "ACLU Immigrants' Rights",
+    number: null,
+    description: "Know your rights resources and legal support",
+    link: "https://www.aclu.org/know-your-rights/immigrants-rights",
+    color: "sage"
+  }
+];
+
+---
+
+<Layout title="News & Resources | Daniel Lopez-Cope" showNav={true} showLandscape={true}>
+  <div class="min-h-screen px-6 py-12 relative z-10">
+    <div class="max-w-4xl mx-auto">
+      <div class="page-card">
+      <!-- Header -->
+      <div class="mb-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-light tracking-wider text-white mb-4">
+          News & Resources
+        </h1>
+        <p class="text-white/60 text-lg">
+          Stay informed. Stay connected. Get help when needed.
+        </p>
+      </div>
+
+      <!-- News Section -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-light text-white mb-8 flex items-center gap-3">
+          <span class="w-2 h-2 bg-dusty-teal rounded-full animate-pulse"></span>
+          Headlines I'm Watching
+        </h2>
+
+        <!-- News source tabs -->
+        <div class="flex gap-2 mb-6 border-b border-white/10 pb-4">
+          <button class="news-tab active" data-source="npr">NPR</button>
+          <button class="news-tab" data-source="bbc">BBC</button>
+          <button class="news-tab" data-source="time">Time</button>
+        </div>
+
+        <!-- News iframe containers -->
+        <div class="news-embed-container">
+          <div id="npr-feed" class="news-iframe-wrapper active">
+            <iframe
+              src="https://www.npr.org/sections/news/"
+              title="NPR News"
+              class="news-iframe"
+              sandbox="allow-scripts allow-same-origin"
+            ></iframe>
+            <div class="iframe-overlay">
+              <a href="https://www.npr.org" target="_blank" rel="noopener noreferrer" class="open-source-btn">
+                Open NPR →
+              </a>
+            </div>
+          </div>
+          <div id="bbc-feed" class="news-iframe-wrapper">
+            <div class="flex items-center justify-center h-full">
+              <a href="https://www.bbc.com/news" target="_blank" rel="noopener noreferrer" class="open-source-btn text-lg px-8 py-4">
+                Open BBC News →
+              </a>
+            </div>
+          </div>
+          <div id="time-feed" class="news-iframe-wrapper">
+            <iframe
+              src="https://time.com/"
+              title="Time"
+              class="news-iframe"
+              sandbox="allow-scripts allow-same-origin"
+            ></iframe>
+            <div class="iframe-overlay">
+              <a href="https://time.com" target="_blank" rel="noopener noreferrer" class="open-source-btn">
+                Open Time →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-white/40 text-sm mt-6 text-center">
+          Some sites may block embedding. Click the button to open directly.
+        </p>
+      </section>
+
+      <!-- Divider -->
+      <div class="border-t border-white/10 my-12"></div>
+
+      <!-- Resources Section -->
+      <section>
+        <h2 class="text-2xl font-light text-white mb-4">
+          Important Resources
+        </h2>
+        <p class="text-white/60 mb-8">
+          If you or someone you know needs help, these organizations are here for you.
+        </p>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          {resources.map((resource, index) => (
+            <a
+              href={resource.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="resource-card group"
+              style={`animation: fadeInUp 0.6s ease ${index * 0.1}s forwards; opacity: 0;`}
+            >
+              <h3 class="text-lg font-light text-white mb-2 group-hover:text-dusty-teal transition-colors">
+                {resource.title}
+              </h3>
+              {resource.number && (
+                <p class="text-dusty-teal text-xl font-light mb-2">
+                  {resource.number}
+                </p>
+              )}
+              <p class="text-white/60 text-sm">{resource.description}</p>
+            </a>
+          ))}
+        </div>
+
+        <!-- Emergency reminder -->
+        <div class="mt-12 p-6 bg-red-500/10 border border-red-500/30 rounded-lg text-center">
+          <p class="text-white/80 text-lg mb-2">
+            If you're in immediate danger, call <strong class="text-white">911</strong>
+          </p>
+          <p class="text-white/50 text-sm">
+            You matter. Your life matters. Help is available.
+          </p>
+        </div>
+      </section>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .page-card {
+      background: rgba(30, 60, 50, 0.55);
+      border: 1px solid rgba(122, 158, 159, 0.25);
+      border-radius: 24px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (min-width: 768px) {
+      .page-card {
+        padding: 3rem;
+      }
+    }
+
+    .resource-card {
+      background: linear-gradient(135deg, rgba(40, 35, 30, 0.8), rgba(30, 25, 20, 0.9));
+      border: 1px solid rgba(122, 158, 159, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .resource-card:hover {
+      background: linear-gradient(135deg, rgba(50, 45, 40, 0.9), rgba(40, 35, 30, 0.95));
+      border-color: rgba(122, 158, 159, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .resource-card:hover h3 {
+      color: #9FBFC0 !important;
+    }
+
+    .resource-card:hover p {
+      color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .news-tab {
+      padding: 0.5rem 1.25rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: 'Roboto', sans-serif;
+      font-weight: 300;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .news-tab:hover {
+      border-color: rgba(122, 158, 159, 0.5);
+      color: #fff;
+      background: rgba(122, 158, 159, 0.15);
+    }
+
+    .news-tab.active {
+      background: linear-gradient(135deg, rgba(122, 158, 159, 0.2), rgba(74, 55, 40, 0.8));
+      border-color: rgba(122, 158, 159, 0.5);
+      color: white;
+    }
+
+    .news-embed-container {
+      position: relative;
+      background: linear-gradient(135deg, rgba(30, 25, 20, 0.95), rgba(20, 15, 12, 0.98));
+      border: 1px solid rgba(122, 158, 159, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      height: 500px;
+    }
+
+    .news-iframe-wrapper {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .news-iframe-wrapper.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .news-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    .iframe-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      background: linear-gradient(to top, rgba(20, 15, 12, 0.98), transparent);
+      display: flex;
+      justify-content: center;
+    }
+
+    .open-source-btn {
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, rgba(122, 158, 159, 0.3), rgba(74, 55, 40, 0.9));
+      border: 1px solid rgba(122, 158, 159, 0.4);
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .open-source-btn:hover {
+      background: linear-gradient(135deg, rgba(122, 158, 159, 0.5), rgba(74, 55, 40, 1));
+      border-color: rgba(122, 158, 159, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.news-tab');
+      const wrappers = document.querySelectorAll('.news-iframe-wrapper');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const source = tab.getAttribute('data-source');
+
+          // Update active tab
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          // Show corresponding iframe
+          wrappers.forEach(w => w.classList.remove('active'));
+          const targetWrapper = document.getElementById(`${source}-feed`);
+          if (targetWrapper) {
+            targetWrapper.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</Layout>

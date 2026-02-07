@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  portfolio:
+    build: .
+    container_name: portfolio-website
+    ports:
+      - "4321:4321"
+    environment:
+      - TAUTULLI_API_KEY=${TAUTULLI_API_KEY}
+      - MEALIE_API_TOKEN=${MEALIE_API_TOKEN}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - web
+
+  # Cloudflare Tunnel (uncomment when ready to deploy)
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: cloudflared-tunnel
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+  #   networks:
+  #     - web
+  #   depends_on:
+  #     - portfolio
+
+networks:
+  web:
+    driver: bridge

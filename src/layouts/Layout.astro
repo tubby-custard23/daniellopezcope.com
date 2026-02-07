@@ -1,0 +1,301 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title: string;
+  showNav?: boolean;
+  showLandscape?: boolean;
+}
+
+const { title, showNav = false, showLandscape = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Daniel Lopez-Cope - Personal & Professional Portfolio" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen">
+    <!-- Landscape Background for inner pages -->
+    {showLandscape && (
+      <>
+        <div class="landscape-bg revealed"></div>
+        <div class="landscape-overlay show"></div>
+      </>
+    )}
+
+    <!-- Navigation (shown after reveal) -->
+    {showNav && (
+      <nav class="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <a href="/" class="text-xl font-light tracking-wider text-white">DLC</a>
+          <div class="flex gap-2">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/personal" class="nav-link">Personal</a>
+            <a href="/professional" class="nav-link">Professional</a>
+            <a href="/socials" class="nav-link">Socials</a>
+            <a href="/news" class="nav-link">News</a>
+          </div>
+        </div>
+      </nav>
+    )}
+
+    <!-- Main Content -->
+    <main class={showNav ? "pt-20 relative z-10" : "relative z-10"}>
+      <slot />
+    </main>
+
+    <!-- Dachshund Easter Egg - Tub -->
+    <div class="dachshund-container" id="dachshund">
+      <img src="/images/tub-right.svg" alt="Tub the dachshund" class="tub-image tub-right" />
+      <img src="/images/tub.svg" alt="Tub the dachshund" class="tub-image tub-left" />
+    </div>
+
+    <!-- Bone for Easter egg -->
+    <svg class="bone" id="bone" viewBox="0 0 100 40">
+      <ellipse cx="15" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+      <ellipse cx="15" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+      <ellipse cx="85" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+      <ellipse cx="85" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+      <rect x="15" y="13" width="70" height="14" rx="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+    </svg>
+
+    <!-- Spotify Player Overlay -->
+    <div id="spotify-overlay" class="spotify-overlay">
+      <button id="spotify-toggle" class="spotify-toggle" aria-label="Toggle music player">
+        <span class="toggle-icon">🎵</span>
+      </button>
+      <div id="spotify-player" class="spotify-player">
+        <iframe
+          style="border-radius:12px"
+          src="https://open.spotify.com/embed/playlist/3CKSR1GENr32zq16LkbNeK?utm_source=generator&theme=0"
+          width="100%"
+          height="352"
+          frameBorder="0"
+          allowfullscreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      // Dachshund (Tub) Easter egg - appears after intro or on inner pages
+      document.addEventListener('DOMContentLoaded', () => {
+        const dachshund = document.getElementById('dachshund') as HTMLElement;
+        const bone = document.getElementById('bone') as HTMLElement;
+
+        if (!dachshund || !bone) return;
+
+        let tubX = -650;
+        let tubY = -150; // bottom offset
+        let tubState = 'hidden';
+        let facingRight = true;
+
+        function setDirection(right: boolean) {
+          facingRight = right;
+          if (right) {
+            dachshund.classList.add('facing-right');
+            dachshund.classList.remove('facing-left');
+          } else {
+            dachshund.classList.add('facing-left');
+            dachshund.classList.remove('facing-right');
+          }
+        }
+
+        let walkTargetX = 0;
+        let walkTargetY = 0;
+        let walkDirection = true;
+
+        function startWalkToBone() {
+          const boneRect = bone.getBoundingClientRect();
+          const boneLeftPos = boneRect.left;
+          const boneCenterX = boneLeftPos + boneRect.width / 2;
+          const tubCenterX = tubX + 320;
+
+          // Determine approach direction based on current position
+          // Tub approaches from whichever side he's on
+          walkDirection = tubCenterX < boneCenterX;
+          setDirection(walkDirection);
+
+          // Set target X: position Tub so his nose is near the bone
+          // If approaching from left (facing right): stop with nose at bone
+          // If approaching from right (facing left): stop with nose at bone
+          walkTargetX = walkDirection ? boneLeftPos - 375 : boneLeftPos - 150;
+
+          // Target Y: align Tub's center with bone
+          const boneBottom = window.innerHeight - boneRect.bottom;
+          walkTargetY = boneBottom - 150;
+
+          tubState = 'walking';
+          dachshund.classList.add('walking');
+          walkToBone();
+        }
+
+        function walkToBone() {
+          if (tubState !== 'walking') return;
+
+          const distanceX = walkTargetX - tubX;
+          const distanceY = walkTargetY - tubY;
+          const totalDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+          if (totalDistance > 15) {
+            // Move toward target
+            const speed = Math.min(5, totalDistance * 0.04 + 1.5);
+            const ratio = speed / totalDistance;
+            tubX += distanceX * ratio;
+            tubY += distanceY * ratio;
+            dachshund.style.left = `${tubX}px`;
+            dachshund.style.bottom = `${tubY}px`;
+            requestAnimationFrame(walkToBone);
+          } else {
+            // Arrived at bone
+            tubX = walkTargetX;
+            tubY = walkTargetY;
+            dachshund.style.left = `${tubX}px`;
+            dachshund.style.bottom = `${tubY}px`;
+            tubState = 'atBone';
+            dachshund.classList.remove('walking');
+          }
+        }
+
+        function startSequence() {
+          // Show bone
+          bone.classList.add('show');
+
+          // Tub enters after a moment
+          setTimeout(() => {
+            tubX = -650;
+            dachshund.style.left = `${tubX}px`;
+            dachshund.classList.add('visible');
+            dachshund.classList.add('walking');
+            setDirection(true); // Start facing right
+
+            setTimeout(() => {
+              startWalkToBone();
+            }, 200);
+          }, 800);
+        }
+
+        // Bone click handler - bounces to safe zones (avoiding center content area)
+        bone.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          if (tubState === 'atBone') {
+            // Bounce bone to a random position in safe zones
+            bone.classList.add('bouncing');
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const margin = 80;
+
+            // Define safe zones (corners and edges, avoiding center)
+            // Zone 1: Bottom left corner
+            // Zone 2: Bottom right corner
+            // Zone 3: Left edge (lower half)
+            // Zone 4: Right edge (lower half)
+            const safeZones = [
+              { // Bottom left
+                rightMin: screenWidth * 0.65, rightMax: screenWidth - margin - 80,
+                bottomMin: margin, bottomMax: screenHeight * 0.35
+              },
+              { // Bottom right
+                rightMin: margin, rightMax: screenWidth * 0.25,
+                bottomMin: margin, bottomMax: screenHeight * 0.35
+              },
+              { // Left edge lower
+                rightMin: screenWidth * 0.75, rightMax: screenWidth - margin - 80,
+                bottomMin: screenHeight * 0.15, bottomMax: screenHeight * 0.45
+              },
+              { // Right edge lower
+                rightMin: margin, rightMax: screenWidth * 0.15,
+                bottomMin: screenHeight * 0.15, bottomMax: screenHeight * 0.45
+              }
+            ];
+
+            // Pick a random safe zone
+            const zone = safeZones[Math.floor(Math.random() * safeZones.length)];
+            const newRight = Math.random() * (zone.rightMax - zone.rightMin) + zone.rightMin;
+            const newBottom = Math.random() * (zone.bottomMax - zone.bottomMin) + zone.bottomMin;
+
+            setTimeout(() => {
+              bone.style.right = `${newRight}px`;
+              bone.style.bottom = `${newBottom}px`;
+              bone.classList.remove('bouncing');
+
+              // Tub looks around first, then follows
+              dachshund.classList.add('looking');
+
+              setTimeout(() => {
+                dachshund.classList.remove('looking');
+                startWalkToBone();
+              }, 800);
+            }, 300);
+          }
+        });
+
+        // Check if we should start
+        function checkAndStart() {
+          const welcomeScreen = document.getElementById('welcome-screen');
+          const introSeen = sessionStorage.getItem('introSeen');
+
+          if (!welcomeScreen || introSeen === 'true') {
+            setTimeout(startSequence, 4000);
+            return true;
+          }
+          return false;
+        }
+
+        // Try to start, or watch for intro completion
+        if (!checkAndStart()) {
+          const checkInterval = setInterval(() => {
+            if (sessionStorage.getItem('introSeen') === 'true') {
+              clearInterval(checkInterval);
+              setTimeout(startSequence, 2000);
+            }
+          }, 500);
+        }
+
+        // Spotify overlay functionality
+        const spotifyOverlay = document.getElementById('spotify-overlay');
+        const spotifyToggle = document.getElementById('spotify-toggle');
+
+        if (spotifyOverlay && spotifyToggle) {
+          // Toggle expanded state
+          spotifyToggle.addEventListener('click', () => {
+            spotifyOverlay.classList.toggle('expanded');
+          });
+
+          // Show overlay after intro or immediately on inner pages
+          function showSpotifyOverlay() {
+            setTimeout(() => {
+              spotifyOverlay.classList.add('show');
+            }, 1500);
+          }
+
+          const welcomeScreen = document.getElementById('welcome-screen');
+          const introSeen = sessionStorage.getItem('introSeen');
+
+          if (!welcomeScreen || introSeen === 'true') {
+            showSpotifyOverlay();
+          } else {
+            // Watch for intro completion
+            const spotifyCheckInterval = setInterval(() => {
+              if (sessionStorage.getItem('introSeen') === 'true') {
+                clearInterval(spotifyCheckInterval);
+                showSpotifyOverlay();
+              }
+            }, 500);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

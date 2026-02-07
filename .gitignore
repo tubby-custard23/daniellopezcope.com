@@ -1,0 +1,38 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# Reference/working files
+*.mov
+Artboard-1.png
+avila.jpg
+dachshunds-poses.jpg
+dark-grey-water-ripple-abstract-260nw-2513878455.webp
+image (25) copy.png
+image (25).png
+mist.webp
+palette.jpg
+nginx.conf

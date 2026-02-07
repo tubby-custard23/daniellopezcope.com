@@ -1,0 +1,329 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Personal Projects | Daniel Lopez-Cope" showNav={true} showLandscape={true}>
+  <div class="min-h-screen px-6 py-12 relative z-10">
+    <div class="max-w-4xl mx-auto">
+      <div class="page-card">
+
+        <!-- Header -->
+        <div class="mb-12 text-center">
+          <h1 class="text-4xl md:text-5xl font-light tracking-wider text-white mb-4">
+            Personal Projects
+          </h1>
+          <p class="text-white/60 text-lg">
+            Things I build, brew, and tinker with outside of work.
+          </p>
+        </div>
+
+        <!-- Tech Projects Section -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Tech Projects</h2>
+
+          <div class="space-y-6">
+            <!-- Location Scout Agent -->
+            <div class="card card-sage">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-light text-white mb-2">Location Scout Agent</h3>
+                  <p class="text-white/60 text-sm leading-relaxed mb-4">
+                    I build AI agents for work, and with a move coming up, I figured I'd put those skills to good use. This n8n workflow takes any address and uses Google Earth, Google Maps, and crime tracking sites to compile a full neighborhood report—nearby schools, coffee shops, churches, bars, libraries, restaurants, typical traffic patterns, crime rates, and more.
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">n8n</span>
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">Google Maps API</span>
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">AI Agent</span>
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  class="px-4 py-2 card card-teal text-sm text-center hover:border-dusty-teal/50 transition-all opacity-50 pointer-events-none"
+                >
+                  Template Coming Soon
+                </a>
+              </div>
+            </div>
+
+            <!-- Portfolio Template -->
+            <div class="card card-sage">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-light text-white mb-2">Portfolio Website Template</h3>
+                  <p class="text-white/60 text-sm leading-relaxed mb-4">
+                    This very website, dockerized and templatized for anyone who wants to create their own personal portfolio. Includes the animated welcome screen, Tub the dachshund easter egg, Spotify overlay, and integrations for Plex, Mealie, and Goodreads. Just add your own content and deploy.
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">Astro</span>
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">Docker</span>
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">Tailwind</span>
+                    <span class="px-3 py-1 text-xs bg-white/10 text-white/70 rounded-full">Self-Hosted</span>
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  class="px-4 py-2 card card-teal text-sm text-center hover:border-dusty-teal/50 transition-all opacity-50 pointer-events-none"
+                >
+                  Template Coming Soon
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Coffee & Espresso Section -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Coffee & Espresso</h2>
+
+          <div class="card card-caramel">
+            <div class="flex flex-col md:flex-row gap-6">
+              <div class="text-5xl">☕</div>
+              <div>
+                <p class="text-white/70 text-sm leading-relaxed mb-4">
+                  My love for coffee started early—I was 5 years old when my grandma first let me have some. Granted, it was more milk than coffee, but it sparked something. By high school, I had my own room for the first time and immediately tried to turn it into a coffee shop: brown paint on the walls, coffee beans scattered around for the smell, the whole nine yards.
+                </p>
+                <p class="text-white/70 text-sm leading-relaxed mb-4">
+                  For years, I was loyal to an extremely old Moka Pot—it served me well. But eventually I found a vintage Gaggia on Facebook Marketplace, and as much as it hurt to let go of the Moka Pot, the machine really does make better coffee. I've got it dialed in perfectly now, all without breaking the bank.
+                </p>
+                <p class="text-white/50 text-sm italic">
+                  Come over and let me make you a cup.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Brewing Section -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Beer Brewing</h2>
+
+          <div class="card card-tan">
+            <div class="flex flex-col md:flex-row gap-6">
+              <div class="text-5xl">🍺</div>
+              <div class="flex-1">
+                <h3 class="text-lg font-light text-white mb-2">
+                  Assistant Brewer @ <a href="https://www.normaltownbrewingco.com/" target="_blank" rel="noopener noreferrer" class="text-dusty-teal hover:text-white transition-colors">Normaltown Brewing Co</a>
+                </h3>
+                <p class="text-white/50 text-sm mb-4">Athens, GA</p>
+                <p class="text-white/70 text-sm leading-relaxed mb-4">
+                  When I'm not behind a screen, I'm often cleaning out a mash tun. I work as an Assistant Brewer at Normaltown Brewing Co here in Athens, learning the craft of making beer at scale while also experimenting with homebrews on the side.
+                </p>
+
+                <!-- Featured Recipe -->
+                <div class="bg-white/5 rounded-lg p-4 mb-4">
+                  <p class="text-white/80 text-sm mb-1 font-medium">Featured Recipe</p>
+                  <p class="text-white text-lg mb-2">Daniel's Dark Lager</p>
+                  <p class="text-white/50 text-xs mb-3">A smooth, malty dark lager that's been selling really well at the brewery.</p>
+                  <a
+                    href="/images/Daniel Dark Lager.pdf"
+                    target="_blank"
+                    class="inline-block px-4 py-2 card card-caramel text-sm hover:border-dusty-teal/50 transition-all"
+                  >
+                    Download Recipe (PDF)
+                  </a>
+                </div>
+
+                <!-- CTA -->
+                <a
+                  href="https://cash.app/$daniellopez0117"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-block px-4 py-2 card card-sage text-sm hover:border-dusty-teal/50 transition-all"
+                >
+                  Buy me a Beer 🍻
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cooking Section -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Cooking</h2>
+
+          <div class="card card-sage">
+            <div class="flex flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <div class="text-5xl">🍳</div>
+                <div>
+                  <p class="text-white/70 text-sm leading-relaxed mb-4">
+                    I absolutely love cooking. There's something deeply satisfying about turning raw ingredients into something delicious. I keep all my favorite recipes organized in Mealie—here are some I use regularly.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Recipe Widget -->
+              <div class="recipe-scroll-wrapper">
+                <div id="mealie-recipes">
+                  <p class="text-white/50 text-sm">Loading recipes...</p>
+                </div>
+              </div>
+
+              <a
+                href="https://mealie.kyoshiisland.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-block px-4 py-2 card card-teal text-sm text-center hover:border-dusty-teal/50 transition-all self-start"
+              >
+                Browse All Recipes →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Media Server Section -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Media Server</h2>
+
+          <div class="card card-teal">
+            <div class="flex flex-col md:flex-row gap-6">
+              <div class="text-5xl">🖥️</div>
+              <div>
+                <p class="text-white/70 text-sm leading-relaxed">
+                  I run a full self-hosted media server setup—Plex, Sonarr, Radarr, the whole stack. It's my digital library for movies, TV shows, and music. Not publicly accessible, but it's one of my favorite ongoing projects to maintain and optimize.
+                </p>
+                <p class="text-white/40 text-xs mt-4">
+                  (Private server — no public links)
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <style is:global>
+    .page-card {
+      background: rgba(45, 55, 45, 0.55);
+      border: 1px solid rgba(122, 158, 159, 0.25);
+      border-radius: 24px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (min-width: 768px) {
+      .page-card {
+        padding: 3rem;
+      }
+    }
+
+    .page-card .card {
+      background: rgba(30, 25, 20, 0.7) !important;
+      border-color: rgba(122, 158, 159, 0.3) !important;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Recipe scroll widget */
+    .recipe-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(122, 158, 159, 0.5) transparent;
+    }
+
+    .recipe-scroll-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .recipe-scroll-wrapper::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+
+    .recipe-scroll-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(122, 158, 159, 0.5);
+      border-radius: 4px;
+    }
+
+    .recipe-container {
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      min-width: max-content;
+    }
+
+    .recipe-item {
+      flex: 0 0 auto;
+      width: 160px;
+      text-align: center;
+    }
+
+    .recipe-image {
+      width: 160px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 0.5rem;
+    }
+
+    .recipe-name {
+      color: #fff;
+      font-weight: 400;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recipe-category {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+    }
+  </style>
+
+  <script>
+    async function loadRecipes() {
+      const container = document.getElementById('mealie-recipes');
+      if (!container) return;
+
+      try {
+        const response = await fetch('/api/mealie');
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+          const recipes = data.items.slice(0, 10);
+          container.innerHTML = `<div class="recipe-container">${recipes.map((recipe: any) => {
+            const imageUrl = recipe.image ? `https://mealie.kyoshiisland.com/api/media/recipes/${recipe.id}/images/original.webp` : '';
+
+            return `
+              <a href="https://mealie.kyoshiisland.com/recipe/${recipe.slug}" target="_blank" rel="noopener noreferrer" class="recipe-item">
+                <img
+                  src="${imageUrl}"
+                  alt="${recipe.name}"
+                  class="recipe-image"
+                  onerror="this.style.background='rgba(255,255,255,0.1)'; this.src=''"
+                />
+                <div class="recipe-name">${recipe.name}</div>
+                ${recipe.recipeCategory ? `<div class="recipe-category">${recipe.recipeCategory.join(', ')}</div>` : ''}
+              </a>
+            `;
+          }).join('')}</div>`;
+        } else {
+          container.innerHTML = '<p class="text-white/50 text-sm">No recipes found.</p>';
+        }
+      } catch (error) {
+        console.error('Failed to load recipes:', error);
+        container.innerHTML = '<p class="text-white/50 text-sm">Unable to load recipes.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadRecipes);
+  </script>
+</Layout>

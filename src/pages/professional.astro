@@ -1,0 +1,247 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const metrics = [
+  { value: "165%+", label: "QoQ NRR Growth" },
+  { value: "30+", label: "AI Agents Deployed" },
+  { value: "5+", label: "Years in SaaS" },
+  { value: "2", label: "Languages (Native)" }
+];
+
+const whatIDo = [
+  {
+    title: "Customer Success Leadership",
+    description: "Driving enterprise retention and growth through strategic partnership with C-suite executives and deep product expertise."
+  },
+  {
+    title: "Technical Advisory",
+    description: "Bridging the gap between customers and product teams—managing APIs, MCP servers, and guiding technical implementations."
+  },
+  {
+    title: "AI & Automation",
+    description: "Designing and deploying AI workflows including voice agents, RAG systems, and automation pipelines that deliver real business outcomes."
+  },
+  {
+    title: "Cross-Functional Collaboration",
+    description: "Working across Product, Engineering, and Sales to synthesize customer feedback into roadmap priorities and enablement strategies."
+  }
+];
+
+const journey = [
+  { role: "Director of Customer Success", company: "Scoot", period: "2023 - Present" },
+  { role: "Customer Success Manager", company: "Scoot", period: "2021 - 2023" },
+  { role: "Carrier Sales Representative", company: "Nolan Transportation Group", period: "2020 - 2021" }
+];
+
+const skills = [
+  "ChurnZero", "HubSpot", "n8n", "Postman", "AWS", "GitHub", "JIRA",
+  "RAG Systems", "MCP Servers", "Gemini", "Cursor", "QuickSight"
+];
+
+const education = {
+  school: "University of Georgia",
+  degrees: "B.A. Political Science • B.A. International Affairs",
+  honors: "Cum Laude",
+  extra: "Drum Captain, Redcoat Marching Band"
+};
+---
+
+<Layout title="Professional | Daniel Lopez-Cope" showNav={true} showLandscape={true}>
+  <div class="min-h-screen px-6 py-12 relative z-10">
+    <div class="max-w-4xl mx-auto">
+      <div class="page-card">
+
+        <!-- Hero -->
+        <div class="mb-16 text-center">
+          <h1 class="text-4xl md:text-5xl font-light tracking-wider text-white mb-6">
+            Daniel Lopez-Cope
+          </h1>
+          <p class="text-xl text-[#9FBFC0] mb-6">
+            Director of Customer Success & Technical Product Advisor
+          </p>
+          <p class="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
+            I help SaaS companies turn customers into advocates. By combining deep product knowledge with technical advisory skills, I architect successful client journeys that drive retention, expansion, and real business outcomes.
+          </p>
+
+          <div class="mt-8 flex justify-center gap-4 flex-wrap">
+            <a
+              href="/images/DL Resume 2025-2026.pdf"
+              target="_blank"
+              class="px-6 py-3 card hover:border-dusty-teal/50 transition-all"
+            >
+              Download Resume
+            </a>
+            <a
+              href="mailto:daniellopezcope@gmail.com"
+              class="px-6 py-3 card card-caramel hover:border-dusty-teal/50 transition-all"
+            >
+              Get in Touch
+            </a>
+          </div>
+        </div>
+
+        <!-- Metrics -->
+        <section class="mb-16">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {metrics.map((metric, index) => (
+              <div
+                class="card card-sage text-center py-6"
+                style={`animation: fadeInUp 0.5s ease ${index * 0.1}s forwards; opacity: 0;`}
+              >
+                <div class="text-3xl md:text-4xl font-light text-dusty-teal mb-2">
+                  {metric.value}
+                </div>
+                <div class="text-white/60 text-sm">
+                  {metric.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- What I Do -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">What I Do</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            {whatIDo.map((item, index) => (
+              <div
+                class="card card-teal"
+                style={`animation: fadeInUp 0.5s ease ${index * 0.1}s forwards; opacity: 0;`}
+              >
+                <h3 class="text-lg font-light text-white mb-3">{item.title}</h3>
+                <p class="text-white/60 text-sm leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Projects -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Projects</h2>
+
+          <a
+            href="https://aisalesagenthq.scoot.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card card-caramel block group"
+          >
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 class="text-xl font-light text-white group-hover:text-dusty-teal transition-colors">
+                  AI Sales Agent HQ
+                </h3>
+                <p class="text-dusty-teal text-sm mt-1">aisalesagenthq.scoot.app</p>
+                <p class="text-white/60 text-sm mt-3 leading-relaxed">
+                  A blog and resource hub I created and manage—featuring AI templates, automation workflows, and practical guides for sales teams looking to leverage AI.
+                </p>
+              </div>
+              <div class="text-white/30 group-hover:text-dusty-teal transition-colors text-3xl">
+                →
+              </div>
+            </div>
+          </a>
+        </section>
+
+        <!-- Journey -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Journey</h2>
+
+          <div class="space-y-4">
+            {journey.map((job, index) => (
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between py-4 border-b border-white/10 last:border-0"
+                style={`animation: fadeInUp 0.5s ease ${index * 0.1}s forwards; opacity: 0;`}
+              >
+                <div>
+                  <h3 class="text-lg font-light text-white">{job.role}</h3>
+                  <p class="text-dusty-teal text-sm">{job.company}</p>
+                </div>
+                <div class="text-white/50 text-sm mt-1 md:mt-0">
+                  {job.period}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- Education inline -->
+          <div class="mt-8 pt-4 border-t border-white/10">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 class="text-lg font-light text-white">{education.school}</h3>
+                <p class="text-dusty-teal text-sm">{education.degrees}</p>
+                <p class="text-white/50 text-sm">{education.honors} • {education.extra}</p>
+              </div>
+              <div class="text-white/50 text-sm mt-1 md:mt-0">
+                2016 - 2019
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Skills -->
+        <section class="mb-16">
+          <h2 class="text-2xl font-light text-white mb-8">Tools & Tech</h2>
+
+          <div class="flex flex-wrap gap-3">
+            {skills.map(skill => (
+              <span class="px-4 py-2 card text-white/80 text-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="mb-16">
+          <div class="flex gap-4 justify-center">
+            <div class="text-center">
+              <span class="text-2xl">🇺🇸</span>
+              <span class="text-white/70 ml-2">English</span>
+              <span class="text-white/40 text-sm ml-1">(Native)</span>
+            </div>
+            <div class="text-white/30">•</div>
+            <div class="text-center">
+              <span class="text-2xl">🇻🇪</span>
+              <span class="text-white/70 ml-2">Spanish</span>
+              <span class="text-white/40 text-sm ml-1">(Native)</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .page-card {
+      background: rgba(20, 35, 45, 0.7);
+      border: 1px solid rgba(122, 158, 159, 0.25);
+      border-radius: 24px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (min-width: 768px) {
+      .page-card {
+        padding: 3rem;
+      }
+    }
+
+    .page-card .card {
+      background: rgba(30, 25, 20, 0.7) !important;
+      border-color: rgba(122, 158, 159, 0.3) !important;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</Layout>

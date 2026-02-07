@@ -1,0 +1,340 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const socials = [
+  { name: "GitHub", link: "https://github.com/tubby-custard23" },
+  { name: "LinkedIn", link: "https://www.linkedin.com/in/daniel-lopez-4a18b4122/" },
+  { name: "TikTok", link: "https://www.tiktok.com/@daniellopez89275" },
+  { name: "Reddit", link: "https://www.reddit.com/user/adollopofdlop" },
+  { name: "Discord: tubby_custard23", link: "#" },
+];
+---
+
+<Layout title="Socials | Daniel Lopez-Cope" showNav={true} showLandscape={true}>
+  <div class="min-h-screen px-6 py-12 relative z-10">
+    <div class="max-w-4xl mx-auto">
+      <div class="page-card">
+      <!-- Header -->
+      <div class="mb-16 text-center">
+        <h1 class="text-4xl md:text-5xl font-light tracking-wider text-white mb-4">
+          Socials & Interests
+        </h1>
+        <p class="text-white/60 text-lg">
+          What I'm into outside of work.
+        </p>
+      </div>
+
+      <!-- Currently Reading Section - Goodreads -->
+      <section id="books" class="mb-16">
+        <h2 class="text-2xl font-light text-white mb-8">
+          What I'm Reading Right Now
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card card-teal goodreads-card">
+            <div id="gr_custom_widget" class="goodreads-widget"></div>
+            <script src="https://www.goodreads.com/review/custom_widget/173414376.Currently%20Reading?cover_position=left&cover_size=medium&num_books=3&order=d&shelf=currently-reading&show_author=1&show_cover=1&show_rating=0&show_review=0&show_tags=0&show_title=1&sort=date_added&widget_bg_transparent=true" type="text/javascript" charset="utf-8"></script>
+          </div>
+          <a
+            href="https://www.goodreads.com/user/show/173414376-daniel-lopez-cope"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card card-teal flex flex-col items-center justify-center text-center group"
+          >
+            <div class="text-4xl mb-3">📚</div>
+            <h3 class="text-lg font-light text-white mb-2 group-hover:text-dusty-teal transition-colors">
+              My Goodreads Profile
+            </h3>
+            <p class="text-white/60 text-sm">
+              See all my shelves & reviews →
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Recently Watched Section - Tautulli/Plex -->
+      <section id="watching" class="mb-16">
+        <h2 class="text-2xl font-light text-white mb-8">
+          Stuff I'm Watching
+        </h2>
+        <div class="card card-caramel">
+          <div id="tautulli-history" class="watch-scroll-wrapper">
+            <p class="text-white/50 text-sm">Loading watch history...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Music Section - Spotify -->
+      <section id="music" class="mb-16">
+        <h2 class="text-2xl font-light text-white mb-8">
+          Music I Like
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card card-sage overflow-hidden" style="padding: 0;">
+            <iframe
+              src="https://open.spotify.com/embed/playlist/3CKSR1GENr32zq16LkbNeK?utm_source=generator&theme=0"
+              width="100%"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              style="border-radius: 12px;"
+            ></iframe>
+          </div>
+          <a
+            href="https://open.spotify.com/user/dani98.dl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card card-sage flex flex-col items-center justify-center text-center group"
+          >
+            <div class="text-4xl mb-3">🎵</div>
+            <h3 class="text-lg font-light text-white mb-2 group-hover:text-dusty-teal transition-colors">
+              My Spotify Profile
+            </h3>
+            <p class="text-white/60 text-sm">
+              See all my playlists →
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Gaming Section -->
+      <section id="gaming" class="mb-16">
+        <h2 class="text-2xl font-light text-white mb-8">
+          Games I Play
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <a
+            href="https://steamcommunity.com/profiles/76561199467746274/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card card-tan flex flex-col items-center justify-center text-center group py-8"
+          >
+            <img
+              src="https://store.cloudflare.steamstatic.com/public/shared/images/header/logo_steam.svg"
+              alt="Steam"
+              class="h-12 mb-4 opacity-80 group-hover:opacity-100 transition-opacity"
+              style="filter: brightness(0) invert(1);"
+            />
+            <h3 class="text-lg font-light text-white mb-2 group-hover:text-dusty-teal transition-colors">
+              My Steam Profile
+            </h3>
+            <p class="text-white/60 text-sm">
+              See my games & activity →
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Social Links -->
+      <section class="text-center">
+        <h2 class="text-2xl font-light text-white mb-8">Connect</h2>
+        <div class="flex justify-center gap-4 flex-wrap">
+          {socials.map(social => (
+            <a
+              href={social.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-6 py-3 card hover:border-dusty-teal/50 transition-all"
+            >
+              {social.name}
+            </a>
+          ))}
+        </div>
+      </section>
+      </div>
+    </div>
+  </div>
+
+  <style is:global>
+    .page-card {
+      background: rgba(160, 90, 60, 0.45);
+      border: 1px solid rgba(200, 140, 100, 0.35);
+      border-radius: 24px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (min-width: 768px) {
+      .page-card {
+        padding: 3rem;
+      }
+    }
+
+    .page-card .card {
+      background: rgba(30, 25, 20, 0.7) !important;
+      border-color: rgba(122, 158, 159, 0.3) !important;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Goodreads widget styling */
+    .goodreads-card {
+      min-height: 150px;
+    }
+
+    .goodreads-widget h2 {
+      display: none !important;
+    }
+
+    .goodreads-widget {
+      background: transparent !important;
+    }
+
+    .goodreads-widget a {
+      color: #7A9E9F !important;
+    }
+
+    .goodreads-widget a:hover {
+      color: #fff !important;
+    }
+
+    #gr_custom_widget {
+      background: transparent;
+    }
+
+    #gr_custom_widget .gr_custom_header {
+      display: none;
+    }
+
+    #gr_custom_widget .gr_custom_each_container {
+      border: none !important;
+      padding: 0.5rem 0 !important;
+    }
+
+    #gr_custom_widget .gr_custom_title a,
+    #gr_custom_widget .gr_custom_author a {
+      color: #fff !important;
+    }
+
+    #gr_custom_widget .gr_custom_author {
+      color: rgba(255,255,255,0.6) !important;
+    }
+
+    /* Tautulli watch history */
+    .watch-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(122, 158, 159, 0.5) transparent;
+    }
+
+    .watch-scroll-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .watch-scroll-wrapper::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+
+    .watch-scroll-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(122, 158, 159, 0.5);
+      border-radius: 4px;
+    }
+
+    .watch-container {
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      min-width: max-content;
+    }
+
+    .watch-item {
+      flex: 0 0 auto;
+      width: 120px;
+      text-align: center;
+    }
+
+    .watch-poster {
+      width: 120px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 0.5rem;
+    }
+
+    .watch-info {
+      padding: 0 0.25rem;
+    }
+
+    .watch-title {
+      color: #fff;
+      font-weight: 400;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .watch-meta {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+
+  <script>
+    async function loadWatchHistory() {
+      const container = document.getElementById('tautulli-history');
+      if (!container) return;
+
+      try {
+        const response = await fetch('/api/tautulli');
+        const data = await response.json();
+        console.log('Tautulli API response:', data);
+
+        if (data.response?.data?.data && data.response.data.data.length > 0) {
+          const history = data.response.data.data;
+          container.innerHTML = `<div class="watch-container">${history.map((item: any) => {
+            const isTV = item.media_type === 'episode';
+            const title = isTV
+              ? `${item.grandparent_title}`
+              : item.title;
+            const subtitle = isTV
+              ? `S${item.parent_media_index}E${item.media_index}`
+              : item.year;
+
+            return `
+              <div class="watch-item">
+                <img
+                  src="${item.thumb ? `https://tautulli.kyoshiisland.com/pms_image_proxy?img=${item.thumb}&width=280&height=400` : ''}"
+                  alt="${title}"
+                  class="watch-poster"
+                  onerror="this.style.display='none'"
+                />
+                <div class="watch-info">
+                  <div class="watch-title">${title}</div>
+                  <div class="watch-meta">${subtitle}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}</div>`;
+        } else {
+          container.innerHTML = '<p class="text-white/50 text-sm">No recent watches found.</p>';
+        }
+      } catch (error) {
+        console.error('Failed to load watch history:', error);
+        container.innerHTML = '<p class="text-white/50 text-sm">Unable to load watch history.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadWatchHistory);
+  </script>
+</Layout>
