@@ -96,20 +96,17 @@ import Layout from '../layouts/Layout.astro';
         const wrapper = document.querySelector('.quote-wrapper');
         const line = document.getElementById('translate-line');
         const phrases = document.querySelectorAll('.quote-phrase');
-        const quoteText = document.querySelector('.quote-text');
+        const quoteContainer = document.getElementById('quote-container');
         const tapHint = document.querySelector('.mobile-tap-hint');
 
         if (wrapper && phrases.length > 0) {
           let isDragging = false;
-          let lineX = 0;
           let isTranslated = false;
-          const isMobile = window.matchMedia('(max-width: 640px)').matches;
 
           function updateTranslation(clientX: number) {
             if (!line) return;
             const rect = wrapper.getBoundingClientRect();
             const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-            lineX = x;
             line.style.left = `${x}px`;
 
             phrases.forEach((phrase) => {
@@ -127,8 +124,11 @@ import Layout from '../layouts/Layout.astro';
             });
           }
 
-          // Mobile: tap to toggle translation
-          function toggleTranslation() {
+          // Tap to toggle translation (works on mobile and as fallback)
+          function toggleTranslation(e: Event) {
+            // Don't toggle if dragging the line on desktop
+            if (isDragging) return;
+
             isTranslated = !isTranslated;
             phrases.forEach((phrase) => {
               const el = phrase as HTMLElement;
@@ -146,16 +146,19 @@ import Layout from '../layouts/Layout.astro';
             }
           }
 
-          if (isMobile && quoteText) {
-            // Mobile: tap quote to translate
-            quoteText.addEventListener('click', toggleTranslation);
-            quoteText.style.cursor = 'pointer';
-          } else if (line) {
-            // Desktop: drag to translate
+          // Always allow tap/click on the quote container to toggle
+          if (quoteContainer) {
+            quoteContainer.style.cursor = 'pointer';
+            quoteContainer.addEventListener('click', toggleTranslation);
+          }
+
+          // Desktop: also support drag on the line
+          if (line) {
             line.addEventListener('mousedown', (e) => {
               isDragging = true;
               line.classList.add('dragging');
               e.preventDefault();
+              e.stopPropagation();
             });
 
             document.addEventListener('mousemove', (e) => {
@@ -165,26 +168,31 @@ import Layout from '../layouts/Layout.astro';
             });
 
             document.addEventListener('mouseup', () => {
-              isDragging = false;
-              line.classList.remove('dragging');
+              if (isDragging) {
+                isDragging = false;
+                line.classList.remove('dragging');
+              }
             });
 
-            // Touch support for tablets
+            // Touch drag support
             line.addEventListener('touchstart', (e) => {
               isDragging = true;
               line.classList.add('dragging');
               e.preventDefault();
-            });
+              e.stopPropagation();
+            }, { passive: false });
 
             document.addEventListener('touchmove', (e) => {
               if (isDragging && e.touches[0]) {
                 updateTranslation(e.touches[0].clientX);
               }
-            });
+            }, { passive: true });
 
             document.addEventListener('touchend', () => {
-              isDragging = false;
-              line.classList.remove('dragging');
+              if (isDragging) {
+                isDragging = false;
+                line.classList.remove('dragging');
+              }
             });
           }
         }

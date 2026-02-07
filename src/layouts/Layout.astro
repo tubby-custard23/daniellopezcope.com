@@ -16,6 +16,7 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Daniel Lopez-Cope - Personal & Professional Portfolio" />
+    <meta name="google" content="notranslate" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,17 +35,40 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
     <!-- Navigation (shown after reveal) -->
     {showNav && (
       <nav class="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <a href="/" class="text-xl font-light tracking-wider text-white">DLC</a>
-          <div class="flex gap-2">
+
+          <!-- Desktop nav -->
+          <div class="hidden md:flex gap-2">
             <a href="/" class="nav-link">Home</a>
             <a href="/personal" class="nav-link">Personal</a>
             <a href="/professional" class="nav-link">Professional</a>
             <a href="/socials" class="nav-link">Socials</a>
             <a href="/news" class="nav-link">News</a>
           </div>
+
+          <!-- Mobile hamburger -->
+          <button id="nav-mobile-menu-btn" class="md:hidden text-white text-2xl p-2" aria-label="Open menu">
+            ☰
+          </button>
         </div>
       </nav>
+    )}
+
+    <!-- Mobile nav overlay (for inner pages) -->
+    {showNav && (
+      <div id="nav-mobile-menu" class="nav-mobile-overlay">
+        <div class="nav-mobile-content">
+          <button id="nav-mobile-close" class="nav-mobile-close" aria-label="Close menu">✕</button>
+          <nav class="nav-mobile-links">
+            <a href="/" class="nav-mobile-link">Home</a>
+            <a href="/personal" class="nav-mobile-link">Personal</a>
+            <a href="/professional" class="nav-mobile-link">Professional</a>
+            <a href="/socials" class="nav-mobile-link">Socials</a>
+            <a href="/news" class="nav-mobile-link">News</a>
+          </nav>
+        </div>
+      </div>
     )}
 
     <!-- Main Content -->
@@ -87,6 +111,35 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
     </div>
 
     <script>
+      // Nav mobile menu toggle
+      document.addEventListener('DOMContentLoaded', () => {
+        const navMenuBtn = document.getElementById('nav-mobile-menu-btn');
+        const navMenuClose = document.getElementById('nav-mobile-close');
+        const navMenu = document.getElementById('nav-mobile-menu');
+        const navLinks = document.querySelectorAll('.nav-mobile-link');
+
+        function openNavMenu() {
+          navMenu?.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeNavMenu() {
+          navMenu?.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+
+        navMenuBtn?.addEventListener('click', openNavMenu);
+        navMenuClose?.addEventListener('click', closeNavMenu);
+
+        navLinks.forEach(link => {
+          link.addEventListener('click', closeNavMenu);
+        });
+
+        navMenu?.addEventListener('click', (e) => {
+          if (e.target === navMenu) closeNavMenu();
+        });
+      });
+
       // Dachshund (Tub) Easter egg - appears after intro or on inner pages
       document.addEventListener('DOMContentLoaded', () => {
         const dachshund = document.getElementById('dachshund') as HTMLElement;
