@@ -34,12 +34,24 @@ export const GET: APIRoute = async () => {
     const stories = response.results.map((page: any) => {
       const properties = page.properties;
 
+      // Get cover image - check CoverURL (URL property), Cover (files property), or page cover
+      let coverImage = null;
+      if (properties.CoverURL?.url) {
+        coverImage = properties.CoverURL.url;
+      } else if (properties.Cover?.files?.[0]) {
+        const file = properties.Cover.files[0];
+        coverImage = file.file?.url || file.external?.url || null;
+      } else if (page.cover) {
+        coverImage = page.cover.file?.url || page.cover.external?.url || null;
+      }
+
       return {
         id: page.id,
         title: properties.Name?.title?.[0]?.plain_text || 'Untitled',
         content: properties.Content?.rich_text?.[0]?.plain_text || '',
         date: properties.Date?.date?.start || null,
         category: properties.Category?.select?.name || 'Uncategorized',
+        coverImage,
       };
     });
 

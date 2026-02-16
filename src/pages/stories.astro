@@ -85,12 +85,61 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Stories Section -->
         <section class="mb-20">
-          <h2 class="text-xl font-light text-white/80 mb-8 tracking-wider border-b border-white/10 pb-2">
-            The Collection
-          </h2>
-          <div id="stories-container" class="space-y-6">
-            <div class="story-loading">
-              <span class="text-white/40 text-sm">Summoning stories from the void...</span>
+          <div class="stories-header">
+            <h2 class="text-xl font-light text-white/80 tracking-wider">
+              The Collection
+            </h2>
+            <div class="view-controls">
+              <button id="view-grid" class="view-btn active" aria-label="Grid view">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+              </button>
+              <button id="view-list" class="view-btn" aria-label="List view">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="3" y="4" width="18" height="4" rx="1"/>
+                  <rect x="3" y="10" width="18" height="4" rx="1"/>
+                  <rect x="3" y="16" width="18" height="4" rx="1"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div class="filter-tabs" id="filter-tabs">
+            <button class="filter-tab active" data-category="all">All</button>
+            <!-- Additional tabs will be added dynamically -->
+          </div>
+
+          <!-- Stories Grid/List Container -->
+          <div id="stories-wrapper" class="stories-wrapper grid-view">
+            <div id="stories-container" class="stories-grid">
+              <div class="story-loading">
+                <span class="text-white/40 text-sm">Summoning stories from the void...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expanded Story Reader -->
+          <div id="story-reader" class="story-reader hidden">
+            <div class="reader-header">
+              <button id="reader-close" class="reader-close" aria-label="Close reader">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="reader-content">
+              <div class="reader-cover" id="reader-cover"></div>
+              <div class="reader-cover-gradient"></div>
+              <div class="reader-body">
+                <h2 class="reader-title" id="reader-title"></h2>
+                <div class="reader-meta" id="reader-meta"></div>
+                <div class="reader-text" id="reader-text"></div>
+              </div>
             </div>
           </div>
         </section>
@@ -474,6 +523,464 @@ import Layout from '../layouts/Layout.astro';
       opacity: 0.5;
     }
 
+    /* Stories Header */
+    .stories-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .view-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .view-btn {
+      background: rgba(100, 80, 140, 0.2);
+      border: 1px solid rgba(140, 120, 180, 0.2);
+      border-radius: 6px;
+      padding: 0.5rem;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .view-btn:hover {
+      background: rgba(100, 80, 140, 0.3);
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .view-btn.active {
+      background: rgba(120, 100, 160, 0.4);
+      border-color: rgba(160, 140, 200, 0.4);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      background: rgba(100, 80, 140, 0.15);
+      border: 1px solid rgba(140, 120, 180, 0.2);
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .filter-tab:hover {
+      background: rgba(100, 80, 140, 0.25);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .filter-tab.active {
+      background: rgba(120, 100, 160, 0.4);
+      border-color: rgba(160, 140, 200, 0.5);
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Stories Wrapper */
+    .stories-wrapper {
+      position: relative;
+    }
+
+    /* Grid View */
+    .stories-wrapper.grid-view .stories-grid {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 280px;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(140, 120, 180, 0.3) transparent;
+      /* Show peek of next card */
+      padding-right: 60px;
+      margin-right: -60px;
+    }
+
+    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar-track {
+      background: rgba(100, 80, 140, 0.1);
+      border-radius: 3px;
+    }
+
+    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar-thumb {
+      background: rgba(140, 120, 180, 0.3);
+      border-radius: 3px;
+    }
+
+    .stories-wrapper.grid-view .story-card-new {
+      scroll-snap-align: start;
+      width: 280px;
+      height: 200px;
+    }
+
+    /* List View */
+    .stories-wrapper.list-view .stories-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .stories-wrapper.list-view .story-card-new {
+      width: 100%;
+      height: auto;
+      min-height: 120px;
+    }
+
+    .stories-wrapper.list-view .story-card-new .card-content {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
+
+    .stories-wrapper.list-view .story-card-new .card-text {
+      flex: 1;
+    }
+
+    /* New Story Card */
+    .story-card-new {
+      position: relative;
+      background: rgba(15, 12, 20, 0.9);
+      border: 1px solid rgba(100, 80, 140, 0.25);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .story-card-new:hover {
+      border-color: rgba(140, 120, 180, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(80, 60, 120, 0.2);
+    }
+
+    .story-card-new.active {
+      border-color: rgba(180, 160, 220, 0.5);
+      box-shadow: 0 0 20px rgba(120, 100, 180, 0.3);
+    }
+
+    /* Card Background Cover */
+    .card-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    .story-card-new:hover .card-cover {
+      opacity: 0.4;
+    }
+
+    .card-cover-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(15, 12, 20, 0.3) 0%,
+        rgba(15, 12, 20, 0.7) 50%,
+        rgba(15, 12, 20, 0.95) 100%
+      );
+    }
+
+    /* Card Content */
+    .card-content {
+      position: relative;
+      z-index: 1;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-header {
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .card-category {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.6rem;
+      background: rgba(100, 80, 140, 0.4);
+      border-radius: 12px;
+      color: rgba(200, 180, 240, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-date {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Preview Text */
+    .card-preview {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-text {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .preview-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, transparent, rgba(15, 12, 20, 0.95));
+      pointer-events: none;
+    }
+
+    /* Expand Indicator */
+    .card-expand-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: rgba(180, 160, 220, 0.7);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .story-card-new:hover .card-expand-hint {
+      opacity: 1;
+    }
+
+    /* Story Reader (Full Width Expanded View) */
+    .story-reader {
+      position: relative;
+      background: rgba(12, 10, 18, 0.98);
+      border: 1px solid rgba(120, 100, 160, 0.3);
+      border-radius: 16px;
+      margin-top: 1.5rem;
+      overflow: hidden;
+      animation: reader-open 0.3s ease-out;
+    }
+
+    .story-reader.hidden {
+      display: none;
+    }
+
+    @keyframes reader-open {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reader-header {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+
+    .reader-close {
+      background: rgba(100, 80, 140, 0.4);
+      border: 1px solid rgba(140, 120, 180, 0.3);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .reader-close:hover {
+      background: rgba(120, 100, 160, 0.5);
+      color: rgba(255, 255, 255, 0.95);
+      transform: scale(1.05);
+    }
+
+    .reader-content {
+      position: relative;
+      min-height: 400px;
+    }
+
+    .reader-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.4;
+    }
+
+    .reader-cover-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 250px;
+      background: linear-gradient(
+        to bottom,
+        rgba(12, 10, 18, 0.2) 0%,
+        rgba(12, 10, 18, 0.6) 40%,
+        rgba(12, 10, 18, 1) 100%
+      );
+    }
+
+    .reader-body {
+      position: relative;
+      z-index: 1;
+      padding: 2.5rem;
+      padding-top: 3.5rem;
+    }
+
+    .reader-title {
+      font-size: 1.75rem;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    .reader-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(100, 80, 140, 0.2);
+    }
+
+    .reader-meta .card-category {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+    }
+
+    .reader-meta .card-date {
+      font-size: 0.8rem;
+    }
+
+    .reader-text {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.9;
+      white-space: pre-wrap;
+      max-width: 700px;
+    }
+
+    .reader-text p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Category Sections (for grouped display) */
+    .category-section {
+      margin-bottom: 2rem;
+    }
+
+    .category-title {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: rgba(180, 160, 220, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      padding-left: 0.25rem;
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
+      .stories-wrapper.grid-view .stories-grid {
+        grid-template-rows: auto;
+        grid-auto-columns: 260px;
+      }
+
+      .stories-wrapper.grid-view .story-card-new {
+        width: 260px;
+        height: 180px;
+      }
+
+      .filter-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .stories-wrapper.list-view .story-card-new .card-content {
+        flex-direction: column;
+      }
+
+      .reader-body {
+        padding: 1.5rem;
+        padding-top: 3rem;
+      }
+
+      .reader-title {
+        font-size: 1.4rem;
+      }
+
+      .reader-text {
+        font-size: 0.95rem;
+        line-height: 1.8;
+      }
+
+      .reader-close {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
     /* Spooky Tub Easter Egg */
     .spooky-tub-container {
       position: fixed;
@@ -810,6 +1317,230 @@ import Layout from '../layouts/Layout.astro';
 
     scheduleLightning();
 
+    // Stories State
+    let allStories: any[] = [];
+    let currentFilter = 'all';
+    let currentView = 'grid';
+
+    // Sort stories by category (alphabetically), then by title within each category
+    function sortStories(stories: any[]) {
+      return [...stories].sort((a, b) => {
+        // First sort by category
+        const catCompare = (a.category || 'Uncategorized').localeCompare(b.category || 'Uncategorized');
+        if (catCompare !== 0) return catCompare;
+        // Then by title alphabetically
+        return (a.title || '').localeCompare(b.title || '');
+      });
+    }
+
+    // Get unique categories from stories
+    function getCategories(stories: any[]): string[] {
+      const categories = new Set(stories.map(s => s.category || 'Uncategorized'));
+      return Array.from(categories).sort();
+    }
+
+    // Create preview text (first ~150 chars)
+    function getPreview(content: string): string {
+      if (!content) return '';
+      const cleaned = content.replace(/\n+/g, ' ').trim();
+      if (cleaned.length <= 150) return cleaned;
+      return cleaned.substring(0, 150).trim() + '...';
+    }
+
+    // Render a story card
+    function renderStoryCard(story: any): string {
+      const preview = getPreview(story.content);
+      const hasCover = !!story.coverImage;
+
+      return `
+        <article class="story-card-new" data-story-id="${story.id}" data-category="${story.category || 'Uncategorized'}">
+          ${hasCover ? `
+            <div class="card-cover" style="background-image: url('${story.coverImage}')"></div>
+          ` : ''}
+          <div class="card-cover-gradient"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="card-title">${story.title}</h3>
+              <div class="card-meta">
+                <span class="card-category">${story.category || 'Uncategorized'}</span>
+                ${story.date ? `<span class="card-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>` : ''}
+              </div>
+            </div>
+            <div class="card-preview">
+              <p class="preview-text">${preview}</p>
+              <div class="preview-fade"></div>
+            </div>
+            <div class="card-expand-hint">
+              <span>Click to read</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    // Open story in reader
+    function openReader(story: any) {
+      const reader = document.getElementById('story-reader');
+      const readerCover = document.getElementById('reader-cover');
+      const readerTitle = document.getElementById('reader-title');
+      const readerMeta = document.getElementById('reader-meta');
+      const readerText = document.getElementById('reader-text');
+
+      if (!reader || !readerTitle || !readerMeta || !readerText) return;
+
+      // Set cover image if available
+      if (readerCover) {
+        if (story.coverImage) {
+          readerCover.style.backgroundImage = `url('${story.coverImage}')`;
+          readerCover.style.display = 'block';
+        } else {
+          readerCover.style.backgroundImage = '';
+          readerCover.style.display = 'none';
+        }
+      }
+
+      // Set content
+      readerTitle.textContent = story.title;
+      readerMeta.innerHTML = `
+        <span class="card-category">${story.category || 'Uncategorized'}</span>
+        ${story.date ? `<span class="card-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>` : ''}
+      `;
+      readerText.textContent = story.content;
+
+      // Show reader
+      reader.classList.remove('hidden');
+
+      // Hide the stories grid
+      const wrapper = document.getElementById('stories-wrapper');
+      if (wrapper) wrapper.style.display = 'none';
+
+      // Scroll to reader
+      setTimeout(() => {
+        reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+
+    // Close reader
+    function closeReader() {
+      const reader = document.getElementById('story-reader');
+      const wrapper = document.getElementById('stories-wrapper');
+
+      if (reader) reader.classList.add('hidden');
+      if (wrapper) wrapper.style.display = '';
+
+      // Remove active state from cards
+      document.querySelectorAll('.story-card-new.active').forEach(c => c.classList.remove('active'));
+    }
+
+    // Setup reader close button
+    function setupReader() {
+      const closeBtn = document.getElementById('reader-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeReader);
+      }
+
+      // Also close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const reader = document.getElementById('story-reader');
+          if (reader && !reader.classList.contains('hidden')) {
+            closeReader();
+          }
+        }
+      });
+    }
+
+    // Render filter tabs
+    function renderFilterTabs(categories: string[]) {
+      const tabsContainer = document.getElementById('filter-tabs');
+      if (!tabsContainer) return;
+
+      tabsContainer.innerHTML = `
+        <button class="filter-tab ${currentFilter === 'all' ? 'active' : ''}" data-category="all">All</button>
+        ${categories.map(cat => `
+          <button class="filter-tab ${currentFilter === cat ? 'active' : ''}" data-category="${cat}">${cat}</button>
+        `).join('')}
+      `;
+
+      // Add click handlers
+      tabsContainer.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          currentFilter = (tab as HTMLElement).dataset.category || 'all';
+          tabsContainer.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderStories();
+        });
+      });
+    }
+
+    // Render stories based on current filter
+    function renderStories() {
+      const container = document.getElementById('stories-container');
+      if (!container) return;
+
+      const filteredStories = currentFilter === 'all'
+        ? allStories
+        : allStories.filter(s => (s.category || 'Uncategorized') === currentFilter);
+
+      if (filteredStories.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🌑</div>
+            <p>No stories in this category yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredStories.map(renderStoryCard).join('');
+
+      // Add click handlers to open reader
+      container.querySelectorAll('.story-card-new').forEach(card => {
+        card.addEventListener('click', () => {
+          const storyId = (card as HTMLElement).dataset.storyId;
+          const story = allStories.find(s => s.id === storyId);
+          if (story) {
+            // Mark this card as active
+            container.querySelectorAll('.story-card-new.active').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            openReader(story);
+          }
+        });
+      });
+    }
+
+    // Setup view toggle
+    function setupViewToggle() {
+      const gridBtn = document.getElementById('view-grid');
+      const listBtn = document.getElementById('view-list');
+      const wrapper = document.getElementById('stories-wrapper');
+
+      if (!gridBtn || !listBtn || !wrapper) return;
+
+      gridBtn.addEventListener('click', () => {
+        currentView = 'grid';
+        wrapper.classList.remove('list-view');
+        wrapper.classList.add('grid-view');
+        gridBtn.classList.add('active');
+        listBtn.classList.remove('active');
+        // Collapse all expanded cards when switching views
+        document.querySelectorAll('.story-card-new.expanded').forEach(c => c.classList.remove('expanded'));
+      });
+
+      listBtn.addEventListener('click', () => {
+        currentView = 'list';
+        wrapper.classList.remove('grid-view');
+        wrapper.classList.add('list-view');
+        listBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+        // Collapse all expanded cards when switching views
+        document.querySelectorAll('.story-card-new.expanded').forEach(c => c.classList.remove('expanded'));
+      });
+    }
+
     // Load stories from Notion
     async function loadStories() {
       const container = document.getElementById('stories-container');
@@ -820,16 +1551,12 @@ import Layout from '../layouts/Layout.astro';
         const data = await response.json();
 
         if (data.stories && data.stories.length > 0) {
-          container.innerHTML = data.stories.map((story: any) => `
-            <article class="story-card">
-              <h3 class="story-title">${story.title}</h3>
-              <div class="story-meta">
-                <span class="story-category">${story.category}</span>
-                ${story.date ? `<span class="story-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>` : ''}
-              </div>
-              <div class="story-content">${story.content}</div>
-            </article>
-          `).join('');
+          allStories = sortStories(data.stories);
+          const categories = getCategories(allStories);
+          renderFilterTabs(categories);
+          renderStories();
+          setupViewToggle();
+          setupReader();
         } else {
           container.innerHTML = `
             <div class="empty-state">
