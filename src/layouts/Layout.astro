@@ -5,9 +5,10 @@ interface Props {
   title: string;
   showNav?: boolean;
   showLandscape?: boolean;
+  showTub?: boolean;
 }
 
-const { title, showNav = false, showLandscape = false } = Astro.props;
+const { title, showNav = false, showLandscape = false, showTub = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -44,6 +45,7 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
             <a href="/personal" class="nav-link">Personal</a>
             <a href="/professional" class="nav-link">Professional</a>
             <a href="/socials" class="nav-link">Socials</a>
+            <a href="/stories" class="nav-link">Dark Tales</a>
             <a href="/news" class="nav-link">News</a>
           </div>
 
@@ -65,6 +67,7 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
             <a href="/personal" class="nav-mobile-link">Personal</a>
             <a href="/professional" class="nav-mobile-link">Professional</a>
             <a href="/socials" class="nav-mobile-link">Socials</a>
+            <a href="/stories" class="nav-mobile-link">Dark Tales</a>
             <a href="/news" class="nav-mobile-link">News</a>
           </nav>
         </div>
@@ -77,19 +80,23 @@ const { title, showNav = false, showLandscape = false } = Astro.props;
     </main>
 
     <!-- Dachshund Easter Egg - Tub -->
-    <div class="dachshund-container" id="dachshund">
-      <img src="/images/tub-right.svg" alt="Tub the dachshund" class="tub-image tub-right" />
-      <img src="/images/tub.svg" alt="Tub the dachshund" class="tub-image tub-left" />
-    </div>
+    {showTub && (
+      <>
+        <div class="dachshund-container" id="dachshund">
+          <img src="/images/tub-right.svg" alt="Tub the dachshund" class="tub-image tub-right" />
+          <img src="/images/tub.svg" alt="Tub the dachshund" class="tub-image tub-left" />
+        </div>
 
-    <!-- Bone for Easter egg -->
-    <svg class="bone" id="bone" viewBox="0 0 100 40">
-      <ellipse cx="15" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
-      <ellipse cx="15" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
-      <ellipse cx="85" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
-      <ellipse cx="85" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
-      <rect x="15" y="13" width="70" height="14" rx="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
-    </svg>
+        <!-- Bone for Easter egg -->
+        <svg class="bone" id="bone" viewBox="0 0 100 40">
+          <ellipse cx="15" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+          <ellipse cx="15" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+          <ellipse cx="85" cy="10" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+          <ellipse cx="85" cy="30" rx="10" ry="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+          <rect x="15" y="13" width="70" height="14" rx="7" fill="#f5f5dc" stroke="#B5835A" stroke-width="1"/>
+        </svg>
+      </>
+    )}
 
     <!-- Spotify Player Overlay -->
     <div id="spotify-overlay" class="spotify-overlay">

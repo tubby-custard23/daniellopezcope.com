@@ -1,0 +1,1349 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Dark Tales | Daniel Lopez-Cope" showNav={false} showLandscape={false} showTub={false}>
+  <!-- Lightning Background -->
+  <div class="lightning-bg">
+    <div class="storm-layer"></div>
+    <div class="lightning-flash" id="lightning-flash"></div>
+    <svg class="lightning-bolts" id="lightning-bolts" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+      <!-- Lightning bolts will be dynamically generated -->
+    </svg>
+    <div class="clouds-layer"></div>
+    <div class="rain-layer"></div>
+  </div>
+
+  <!-- Spooky Tub Easter Egg -->
+  <div class="spooky-tub-container" id="spooky-tub">
+    <img src="/images/tub-spooky-right.svg" alt="Spooky Tub" class="spooky-tub-image spooky-tub-right" />
+    <img src="/images/tub-spooky-left.svg" alt="Spooky Tub" class="spooky-tub-image spooky-tub-left" />
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 min-h-screen">
+    <!-- Header -->
+    <header class="pt-8 pb-4 px-6">
+      <nav class="max-w-4xl mx-auto flex items-center justify-between">
+        <a href="/" class="text-white/70 hover:text-white transition-colors text-sm">← Back Home</a>
+        <h1 class="font-light text-white/90 tracking-widest text-lg">DARK TALES</h1>
+        <div class="audio-controls">
+          <button id="audio-toggle" class="audio-toggle" aria-label="Toggle ambient audio">
+            <span class="audio-icon audio-off">🔇</span>
+            <span class="audio-icon audio-on hidden">🔊</span>
+          </button>
+          <button id="settings-toggle" class="settings-toggle hidden" aria-label="Toggle audio settings">
+            ⚙️
+          </button>
+          <div class="audio-panel hidden" id="audio-panel">
+            <div class="volume-control">
+              <span class="volume-label">Vol</span>
+              <input type="range" id="volume-slider" min="0" max="100" value="50" class="volume-slider" />
+            </div>
+            <div class="mood-control">
+              <span class="mood-label">Mood</span>
+              <select id="mood-select" class="mood-select">
+                <option value="auto">Auto</option>
+                <option value="quiet">Quiet Night</option>
+                <option value="enigmatic">Enigmatic</option>
+                <option value="suspense">Suspense</option>
+                <option value="storm">Storm</option>
+                <option value="fullstorm">Full Storm</option>
+                <option value="creepy">Creepy</option>
+                <option value="calm">Eerie Calm</option>
+                <option value="dark">Dark & Mysterious</option>
+                <option value="tension">Tension</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Ambient Audio Mixer -->
+    <audio id="audio-night" loop preload="auto" src="/audio/freesound_community-night-ambience-17064.mp3"></audio>
+    <audio id="audio-storm1" loop preload="auto" src="/audio/eco-art-sounds-of-a-storm-with-wind-and-thunder-375923.mp3"></audio>
+    <audio id="audio-storm2" loop preload="auto" src="/audio/universfield-thunderstorm-ambiance-191991.mp3"></audio>
+    <audio id="audio-piano1" loop preload="auto" src="/audio/farran_ez-minimal-piano-underscore-456148.mp3"></audio>
+    <audio id="audio-piano2" loop preload="auto" src="/audio/universfield-creepy-piano-for-scary-stories-158423.mp3"></audio>
+    <audio id="audio-piano3" loop preload="auto" src="/audio/theojt-suspense-piano-theme-131357.mp3"></audio>
+    <audio id="audio-piano4" loop preload="auto" src="/audio/universfield-dark-crime-piano-drama-449252.mp3"></audio>
+    <audio id="audio-piano5" loop preload="auto" src="/audio/universfield-enigmatic-piano-atmosphere-144734.mp3"></audio>
+    <audio id="audio-strings" loop preload="auto" src="/audio/freesound_community-suspense_strings_001wav-14805.mp3"></audio>
+
+    <main class="px-6 py-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Intro -->
+        <div class="text-center mb-16">
+          <p class="text-white/50 text-sm italic max-w-xl mx-auto leading-relaxed mb-4">
+            A collection of scary stories, paranormal encounters, and folklore from the places I've been and the people I've known.
+          </p>
+          <p class="text-white/40 text-xs max-w-lg mx-auto leading-relaxed">
+            These are experiences I've had firsthand, stories passed down through my family, or accounts shared directly with me by people I trust. I also include folklore and legends from regions I've traveled that have stuck with me. Any story that isn't mine is credited to its original teller.
+          </p>
+        </div>
+
+        <!-- Stories Section -->
+        <section class="mb-20">
+          <h2 class="text-xl font-light text-white/80 mb-8 tracking-wider border-b border-white/10 pb-2">
+            The Collection
+          </h2>
+          <div id="stories-container" class="space-y-6">
+            <div class="story-loading">
+              <span class="text-white/40 text-sm">Summoning stories from the void...</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submit Story Section -->
+        <section class="mb-16">
+          <div class="story-card submit-card">
+            <h2 class="text-xl font-light text-white/90 mb-4 tracking-wider">
+              Share Your Own Darkness
+            </h2>
+            <p class="text-white/50 text-sm mb-6 leading-relaxed">
+              Have a story that keeps you up at night? A childhood memory you can't explain?
+              Folklore passed down in your family? I'd love to hear it.
+            </p>
+
+            <form id="story-form" class="space-y-4">
+              <div>
+                <label for="name" class="block text-white/60 text-sm mb-1">Your Name (or alias)</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  class="story-input"
+                  placeholder="Anonymous is fine..."
+                />
+              </div>
+
+              <div>
+                <label for="email" class="block text-white/60 text-sm mb-1">Email (optional, for follow-up)</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="story-input"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label for="title" class="block text-white/60 text-sm mb-1">Story Title</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  class="story-input"
+                  placeholder="Give it a name..."
+                />
+              </div>
+
+              <div>
+                <label for="category" class="block text-white/60 text-sm mb-1">Category</label>
+                <select id="category" name="category" class="story-input">
+                  <option value="Personal Encounter">Personal Encounter</option>
+                  <option value="Folklore">Folklore / Legend</option>
+                  <option value="Urban Legend">Urban Legend</option>
+                  <option value="Dream">Recurring Dream / Nightmare</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="story" class="block text-white/60 text-sm mb-1">Your Story</label>
+                <textarea
+                  id="story"
+                  name="story"
+                  required
+                  rows="8"
+                  class="story-input"
+                  placeholder="Tell me what happened..."
+                ></textarea>
+              </div>
+
+              <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_KEY" />
+              <input type="hidden" name="subject" value="New Dark Tale Submission" />
+              <input type="hidden" name="from_name" value="Dark Tales - Story Submission" />
+
+              <button type="submit" class="submit-btn">
+                <span class="btn-text">Submit Your Tale</span>
+                <span class="btn-loading hidden">Sending...</span>
+              </button>
+            </form>
+
+            <div id="form-success" class="hidden mt-4 p-4 bg-green-900/30 border border-green-500/30 rounded-lg">
+              <p class="text-green-400 text-sm">Your story has been received. Thank you for sharing your darkness.</p>
+            </div>
+
+            <div id="form-error" class="hidden mt-4 p-4 bg-red-900/30 border border-red-500/30 rounded-lg">
+              <p class="text-red-400 text-sm">Something went wrong. Please try emailing directly: daniellopezcope@gmail.com</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <style is:global>
+    /* Lightning Background */
+    .lightning-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #0a0a0f 0%, #0d0d15 50%, #08080c 100%);
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .storm-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 20%, rgba(30, 20, 50, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 30% 30%, rgba(20, 15, 40, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 45% at 70% 25%, rgba(25, 18, 45, 0.35) 0%, transparent 55%);
+    }
+
+    .clouds-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 60%;
+      background:
+        radial-gradient(ellipse 30% 20% at 20% 30%, rgba(40, 35, 60, 0.6) 0%, transparent 70%),
+        radial-gradient(ellipse 25% 15% at 50% 25%, rgba(35, 30, 55, 0.5) 0%, transparent 60%),
+        radial-gradient(ellipse 35% 25% at 80% 35%, rgba(45, 38, 65, 0.55) 0%, transparent 65%),
+        radial-gradient(ellipse 20% 12% at 35% 40%, rgba(38, 32, 58, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 28% 18% at 65% 20%, rgba(42, 36, 62, 0.5) 0%, transparent 60%);
+      animation: clouds-drift 120s linear infinite;
+    }
+
+    @keyframes clouds-drift {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .lightning-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(180, 170, 255, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lightning-flash.flash {
+      animation: lightning-strike 0.15s ease-out;
+    }
+
+    .lightning-flash.flash-bright {
+      animation: lightning-strike-bright 0.2s ease-out;
+    }
+
+    @keyframes lightning-strike {
+      0% { opacity: 0; }
+      10% { opacity: 0.6; }
+      20% { opacity: 0.2; }
+      30% { opacity: 0.8; }
+      50% { opacity: 0.1; }
+      70% { opacity: 0.4; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes lightning-strike-bright {
+      0% { opacity: 0; }
+      5% { opacity: 1; }
+      15% { opacity: 0.3; }
+      25% { opacity: 0.9; }
+      40% { opacity: 0.2; }
+      60% { opacity: 0.5; }
+      80% { opacity: 0.1; }
+      100% { opacity: 0; }
+    }
+
+    .lightning-bolts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .lightning-bolt {
+      fill: none;
+      stroke: rgba(200, 180, 255, 0.9);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(180, 160, 255, 0.8)) drop-shadow(0 0 20px rgba(150, 130, 220, 0.6));
+      opacity: 0;
+    }
+
+    .lightning-bolt.strike {
+      animation: bolt-flash 0.25s ease-out forwards;
+    }
+
+    .lightning-bolt.strike-bright {
+      stroke: rgba(255, 250, 255, 0.95);
+      stroke-width: 3;
+      filter: drop-shadow(0 0 12px rgba(220, 200, 255, 0.9)) drop-shadow(0 0 30px rgba(180, 160, 255, 0.7)) drop-shadow(0 0 50px rgba(150, 130, 220, 0.5));
+      animation: bolt-flash-bright 0.3s ease-out forwards;
+    }
+
+    @keyframes bolt-flash {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      30% { opacity: 0.4; }
+      50% { opacity: 0.9; }
+      70% { opacity: 0.2; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes bolt-flash-bright {
+      0% { opacity: 0; }
+      5% { opacity: 1; }
+      20% { opacity: 0.5; }
+      35% { opacity: 1; }
+      50% { opacity: 0.3; }
+      70% { opacity: 0.6; }
+      85% { opacity: 0.1; }
+      100% { opacity: 0; }
+    }
+
+    .lightning-branch {
+      stroke-width: 1;
+      opacity: 0.7;
+    }
+
+    .rain-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cline x1='50' y1='0' x2='50' y2='10' stroke='rgba(150,150,180,0.1)' stroke-width='0.5'/%3E%3C/svg%3E");
+      background-size: 20px 20px;
+      animation: rain-fall 0.5s linear infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes rain-fall {
+      from { background-position: 0 0; }
+      to { background-position: 20px 20px; }
+    }
+
+    /* Story Cards */
+    .story-card {
+      background: rgba(15, 12, 20, 0.85);
+      border: 1px solid rgba(100, 80, 140, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .story-card:hover {
+      border-color: rgba(140, 120, 180, 0.3);
+      box-shadow: 0 0 30px rgba(100, 80, 150, 0.1);
+    }
+
+    .submit-card {
+      background: rgba(20, 15, 30, 0.9);
+      border-color: rgba(120, 100, 160, 0.25);
+    }
+
+    .story-title {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 300;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .story-category {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(100, 80, 140, 0.3);
+      border-radius: 20px;
+      color: rgba(180, 160, 220, 0.9);
+    }
+
+    .story-date {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .story-content {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .story-loading {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* Form Styles */
+    .story-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(10, 8, 15, 0.8);
+      border: 1px solid rgba(100, 80, 140, 0.3);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .story-input:focus {
+      outline: none;
+      border-color: rgba(140, 120, 180, 0.5);
+      box-shadow: 0 0 15px rgba(100, 80, 150, 0.2);
+    }
+
+    .story-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    select.story-input {
+      cursor: pointer;
+    }
+
+    textarea.story-input {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(80, 60, 120, 0.6) 0%, rgba(60, 45, 90, 0.8) 100%);
+      border: 1px solid rgba(120, 100, 160, 0.4);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, rgba(100, 80, 140, 0.7) 0%, rgba(80, 60, 110, 0.9) 100%);
+      border-color: rgba(140, 120, 180, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Spooky Tub Easter Egg */
+    .spooky-tub-container {
+      position: fixed;
+      bottom: 20px;
+      left: -200px;
+      width: 180px;
+      height: 100px;
+      z-index: 1000;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.5s ease, filter 0.3s ease, transform 0.2s ease;
+      filter: drop-shadow(0 0 15px rgba(100, 50, 150, 0.4));
+    }
+
+    .spooky-tub-container.visible:hover {
+      filter: drop-shadow(0 0 25px rgba(150, 100, 200, 0.7)) drop-shadow(0 0 40px rgba(120, 80, 180, 0.4));
+      transform: scale(1.05) translateY(-3px);
+    }
+
+    .spooky-tub-container.visible {
+      opacity: 1;
+    }
+
+    .spooky-tub-container.walking {
+      animation: spooky-tub-float 0.4s ease-in-out infinite;
+    }
+
+    .spooky-tub-container.spooked {
+      animation: spooky-tub-spooked 0.3s ease-in-out 2;
+    }
+
+    @keyframes spooky-tub-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+
+    @keyframes spooky-tub-spooked {
+      0% { transform: translateY(0) scale(1); }
+      20% { transform: translateY(-40px) scale(1.1); }
+      40% { transform: translateY(-35px) scale(1.05); }
+      60% { transform: translateY(-20px) scale(1.08); }
+      80% { transform: translateY(-5px) scale(1); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .spooky-tub-container.peeking {
+      animation: none;
+    }
+
+    .spooky-tub-container.peeking .spooky-tub-image {
+      clip-path: inset(0 0 35% 0);
+    }
+
+    .spooky-tub-image {
+      width: 100%;
+      height: auto;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .spooky-tub-right { display: block; }
+    .spooky-tub-left { display: none; }
+
+    .spooky-tub-container.facing-right .spooky-tub-right { display: block; }
+    .spooky-tub-container.facing-right .spooky-tub-left { display: none; }
+
+    .spooky-tub-container.facing-left .spooky-tub-right { display: none; }
+    .spooky-tub-container.facing-left .spooky-tub-left { display: block; }
+
+    /* Audio Controls */
+    .audio-controls {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .audio-toggle {
+      background: rgba(100, 80, 140, 0.3);
+      border: 1px solid rgba(140, 120, 180, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    .audio-toggle:hover {
+      background: rgba(120, 100, 160, 0.4);
+      border-color: rgba(160, 140, 200, 0.5);
+    }
+
+    .audio-toggle.playing {
+      background: rgba(100, 140, 80, 0.3);
+      border-color: rgba(140, 180, 120, 0.4);
+    }
+
+    .audio-icon.hidden {
+      display: none;
+    }
+
+    .settings-toggle {
+      background: rgba(100, 80, 140, 0.3);
+      border: 1px solid rgba(140, 120, 180, 0.3);
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .settings-toggle:hover {
+      background: rgba(120, 100, 160, 0.4);
+      border-color: rgba(160, 140, 200, 0.5);
+    }
+
+    .settings-toggle.hidden {
+      display: none;
+    }
+
+    .settings-toggle.active {
+      background: rgba(140, 120, 180, 0.5);
+    }
+
+    .audio-panel {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      background: rgba(15, 12, 20, 0.95);
+      border: 1px solid rgba(140, 120, 180, 0.3);
+      border-radius: 10px;
+      padding: 0.75rem;
+      min-width: 160px;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .audio-panel.hidden {
+      display: none;
+    }
+
+    .volume-control, .mood-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .mood-control {
+      margin-bottom: 0;
+    }
+
+    .volume-label, .mood-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      width: 32px;
+    }
+
+    .volume-slider {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(100, 80, 140, 0.4);
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: rgba(180, 160, 220, 0.9);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .volume-slider::-webkit-slider-thumb:hover {
+      background: rgba(200, 180, 240, 1);
+    }
+
+    .mood-select {
+      flex: 1;
+      background: rgba(100, 80, 140, 0.3);
+      border: 1px solid rgba(140, 120, 180, 0.3);
+      border-radius: 4px;
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.25rem 0.4rem;
+      cursor: pointer;
+    }
+
+    .mood-select:focus {
+      outline: none;
+      border-color: rgba(180, 160, 220, 0.5);
+    }
+
+    .mood-select option {
+      background: #1a1520;
+      color: white;
+    }
+  </style>
+
+  <script>
+    // Lightning effect
+    const lightningFlash = document.getElementById('lightning-flash');
+    const lightningBolts = document.getElementById('lightning-bolts');
+
+    // Generate a jagged lightning bolt path
+    function generateBoltPath(startX: number, startY: number, endY: number, maxOffset: number): string {
+      let path = `M ${startX} ${startY}`;
+      let currentX = startX;
+      let currentY = startY;
+      const segments = 8 + Math.floor(Math.random() * 6);
+      const segmentHeight = (endY - startY) / segments;
+
+      for (let i = 0; i < segments; i++) {
+        currentY += segmentHeight;
+        const offset = (Math.random() - 0.5) * maxOffset;
+        currentX += offset;
+        path += ` L ${currentX} ${currentY}`;
+      }
+
+      return path;
+    }
+
+    // Generate branch paths
+    function generateBranches(mainPath: string, count: number): string[] {
+      const branches: string[] = [];
+      const points = mainPath.split(' L ').slice(1);
+
+      for (let i = 0; i < count; i++) {
+        const pointIndex = Math.floor(Math.random() * (points.length - 2)) + 1;
+        const point = points[pointIndex];
+        if (!point) continue;
+
+        const [x, y] = point.split(' ').map(Number);
+        const branchLength = 30 + Math.random() * 60;
+        const angle = (Math.random() - 0.5) * Math.PI * 0.8;
+        const endX = x + Math.cos(angle) * branchLength;
+        const endY = y + Math.sin(angle) * branchLength + branchLength * 0.5;
+
+        let branchPath = `M ${x} ${y}`;
+        let bx = x, by = y;
+        const segs = 3 + Math.floor(Math.random() * 3);
+        for (let j = 0; j < segs; j++) {
+          bx += (endX - x) / segs + (Math.random() - 0.5) * 15;
+          by += (endY - y) / segs;
+          branchPath += ` L ${bx} ${by}`;
+        }
+        branches.push(branchPath);
+      }
+
+      return branches;
+    }
+
+    function createLightningBolt() {
+      if (!lightningBolts) return;
+
+      const isBright = Math.random() > 0.6;
+      const startX = Math.random() * 1600 + 160;
+      const startY = 0;
+      const endY = 400 + Math.random() * 300;
+      const maxOffset = 80 + Math.random() * 60;
+
+      const mainPath = generateBoltPath(startX, startY, endY, maxOffset);
+      const branches = generateBranches(mainPath, Math.floor(Math.random() * 4) + 1);
+
+      // Create main bolt
+      const bolt = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      bolt.setAttribute('d', mainPath);
+      bolt.classList.add('lightning-bolt');
+      bolt.classList.add(isBright ? 'strike-bright' : 'strike');
+      lightningBolts.appendChild(bolt);
+
+      // Create branches
+      branches.forEach(branchPath => {
+        const branch = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        branch.setAttribute('d', branchPath);
+        branch.classList.add('lightning-bolt', 'lightning-branch');
+        branch.classList.add(isBright ? 'strike-bright' : 'strike');
+        lightningBolts.appendChild(branch);
+      });
+
+      // Remove after animation
+      setTimeout(() => {
+        bolt.remove();
+        lightningBolts.querySelectorAll('.lightning-branch').forEach(b => {
+          if (!b.classList.contains('strike') && !b.classList.contains('strike-bright')) return;
+          b.remove();
+        });
+      }, 350);
+    }
+
+    function triggerLightning() {
+      if (!lightningFlash) return;
+
+      const isBright = Math.random() > 0.7;
+      lightningFlash.classList.remove('flash', 'flash-bright');
+      void lightningFlash.offsetWidth;
+      lightningFlash.classList.add(isBright ? 'flash-bright' : 'flash');
+
+      const xPos = Math.random() * 60 + 20;
+      lightningFlash.style.background = `radial-gradient(ellipse 80% 60% at ${xPos}% 30%, rgba(180, 170, 255, 0.4) 0%, transparent 70%)`;
+
+      // Also create visual bolt
+      createLightningBolt();
+    }
+
+    // El Catatumbo has near-constant lightning
+    function scheduleLightning() {
+      const delay = Math.random() * 2500 + 400;
+      setTimeout(() => {
+        triggerLightning();
+
+        // Sometimes double/triple strike (like Catatumbo)
+        if (Math.random() > 0.5) {
+          setTimeout(() => {
+            createLightningBolt();
+            triggerLightning();
+          }, 80 + Math.random() * 120);
+        }
+        if (Math.random() > 0.7) {
+          setTimeout(createLightningBolt, 200 + Math.random() * 100);
+        }
+
+        scheduleLightning();
+      }, delay);
+    }
+
+    scheduleLightning();
+
+    // Load stories from Notion
+    async function loadStories() {
+      const container = document.getElementById('stories-container');
+      if (!container) return;
+
+      try {
+        const response = await fetch('/api/stories');
+        const data = await response.json();
+
+        if (data.stories && data.stories.length > 0) {
+          container.innerHTML = data.stories.map((story: any) => `
+            <article class="story-card">
+              <h3 class="story-title">${story.title}</h3>
+              <div class="story-meta">
+                <span class="story-category">${story.category}</span>
+                ${story.date ? `<span class="story-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>` : ''}
+              </div>
+              <div class="story-content">${story.content}</div>
+            </article>
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🌑</div>
+              <p>No stories have emerged from the darkness yet.</p>
+              <p class="text-sm mt-2">Check back soon, or submit your own below.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load stories:', error);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚡</div>
+            <p>The storm disrupted our connection.</p>
+            <p class="text-sm mt-2">Please refresh to try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStories);
+
+    // Ambient Audio Mixer - Dynamic stormy night soundscape
+    const audioToggle = document.getElementById('audio-toggle');
+    const audioPanel = document.getElementById('audio-panel');
+    const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+    const moodSelect = document.getElementById('mood-select') as HTMLSelectElement;
+    const audioOn = document.querySelector('.audio-on');
+    const audioOff = document.querySelector('.audio-off');
+    let isPlaying = false;
+    let mixerInterval: ReturnType<typeof setInterval> | null = null;
+    let masterVolume = 0.5;
+    let autoMood = true;
+
+    // Audio tracks
+    const tracks = {
+      night: document.getElementById('audio-night') as HTMLAudioElement,
+      storm1: document.getElementById('audio-storm1') as HTMLAudioElement,
+      storm2: document.getElementById('audio-storm2') as HTMLAudioElement,
+      piano1: document.getElementById('audio-piano1') as HTMLAudioElement,
+      piano2: document.getElementById('audio-piano2') as HTMLAudioElement,
+      piano3: document.getElementById('audio-piano3') as HTMLAudioElement,
+      piano4: document.getElementById('audio-piano4') as HTMLAudioElement,
+      piano5: document.getElementById('audio-piano5') as HTMLAudioElement,
+      strings: document.getElementById('audio-strings') as HTMLAudioElement,
+    };
+
+    // Target volumes for each track (will fade to these)
+    const targetVolumes: Record<string, number> = {
+      night: 0,
+      storm1: 0,
+      storm2: 0,
+      piano1: 0,
+      piano2: 0,
+      piano3: 0,
+      piano4: 0,
+      piano5: 0,
+      strings: 0,
+    };
+
+    // Current volumes
+    const currentVolumes: Record<string, number> = { ...targetVolumes };
+
+    // Fade speed (how much to change volume per tick)
+    const fadeSpeed = 0.02;
+
+    // Initialize all tracks
+    Object.values(tracks).forEach(track => {
+      if (track) {
+        track.volume = 0;
+      }
+    });
+
+    // Smoothly fade volumes toward targets
+    function updateVolumes() {
+      Object.keys(tracks).forEach(key => {
+        const track = tracks[key as keyof typeof tracks];
+        if (!track) return;
+
+        const target = targetVolumes[key] * masterVolume;
+        const current = currentVolumes[key];
+
+        if (Math.abs(target - current) > 0.01) {
+          const newVol = current + (target > current ? fadeSpeed : -fadeSpeed);
+          currentVolumes[key] = Math.max(0, Math.min(1, newVol));
+          track.volume = currentVolumes[key];
+        } else {
+          track.volume = target;
+        }
+      });
+    }
+
+    // Reset all piano volumes
+    function clearPianos() {
+      targetVolumes.piano1 = 0;
+      targetVolumes.piano2 = 0;
+      targetVolumes.piano3 = 0;
+      targetVolumes.piano4 = 0;
+      targetVolumes.piano5 = 0;
+    }
+
+    // Set a specific mood by name
+    function setMoodByName(name: string) {
+      clearPianos();
+      targetVolumes.strings = 0;
+
+      switch(name) {
+        case 'quiet':
+          targetVolumes.night = 0.4;
+          targetVolumes.storm1 = 0;
+          targetVolumes.storm2 = 0;
+          targetVolumes.piano1 = 0.2;
+          break;
+        case 'enigmatic':
+          targetVolumes.night = 0.35;
+          targetVolumes.storm1 = 0;
+          targetVolumes.storm2 = 0.1;
+          targetVolumes.piano5 = 0.25;
+          break;
+        case 'suspense':
+          targetVolumes.night = 0.3;
+          targetVolumes.storm1 = 0;
+          targetVolumes.storm2 = 0.25;
+          targetVolumes.piano3 = 0.2;
+          break;
+        case 'storm':
+          targetVolumes.night = 0.2;
+          targetVolumes.storm1 = 0.35;
+          targetVolumes.storm2 = 0.2;
+          targetVolumes.piano2 = 0.15;
+          break;
+        case 'fullstorm':
+          targetVolumes.night = 0.15;
+          targetVolumes.storm1 = 0.4;
+          targetVolumes.storm2 = 0.3;
+          targetVolumes.piano4 = 0.2;
+          break;
+        case 'creepy':
+          targetVolumes.night = 0.15;
+          targetVolumes.storm1 = 0.3;
+          targetVolumes.storm2 = 0.25;
+          targetVolumes.piano2 = 0.18;
+          targetVolumes.piano5 = 0.1;
+          break;
+        case 'calm':
+          targetVolumes.night = 0.3;
+          targetVolumes.storm1 = 0;
+          targetVolumes.storm2 = 0;
+          targetVolumes.piano1 = 0.25;
+          targetVolumes.piano3 = 0.15;
+          break;
+        case 'dark':
+          targetVolumes.night = 0.25;
+          targetVolumes.storm1 = 0;
+          targetVolumes.storm2 = 0.15;
+          targetVolumes.piano4 = 0.25;
+          targetVolumes.piano5 = 0.15;
+          break;
+        case 'tension':
+          targetVolumes.night = 0.2;
+          targetVolumes.storm1 = 0.15;
+          targetVolumes.storm2 = 0.1;
+          targetVolumes.piano3 = 0.1;
+          targetVolumes.strings = 0.2;
+          break;
+      }
+    }
+
+    // Pick a random mood and set target volumes
+    function setMood() {
+      if (!autoMood) return;
+
+      const mood = Math.random();
+      clearPianos();
+
+      if (mood < 0.2) {
+        setMoodByName('quiet');
+      } else if (mood < 0.32) {
+        setMoodByName('enigmatic');
+      } else if (mood < 0.44) {
+        setMoodByName('suspense');
+      } else if (mood < 0.56) {
+        setMoodByName('storm');
+      } else if (mood < 0.68) {
+        setMoodByName('fullstorm');
+      } else if (mood < 0.78) {
+        setMoodByName('creepy');
+      } else if (mood < 0.88) {
+        setMoodByName('calm');
+      } else if (mood < 0.94) {
+        setMoodByName('dark');
+      } else {
+        setMoodByName('tension');
+      }
+    }
+
+    function startMixer() {
+      // Reset all volumes to 0 first
+      Object.keys(currentVolumes).forEach(key => {
+        currentVolumes[key] = 0;
+      });
+      Object.values(tracks).forEach(track => {
+        if (track) {
+          track.volume = 0;
+          track.currentTime = 0;
+          track.play().catch(() => {});
+        }
+      });
+
+      // Set initial mood
+      if (autoMood) {
+        setMood();
+      } else {
+        setMoodByName(moodSelect?.value || 'quiet');
+      }
+
+      // Update volumes smoothly every 50ms
+      if (mixerInterval) clearInterval(mixerInterval);
+      mixerInterval = setInterval(updateVolumes, 50);
+
+      // Change mood every 20-40 seconds
+      scheduleMoodChange();
+    }
+
+    function scheduleMoodChange() {
+      if (!isPlaying || !autoMood) return;
+      const delay = 20000 + Math.random() * 20000;
+      setTimeout(() => {
+        if (isPlaying && autoMood) {
+          setMood();
+          scheduleMoodChange();
+        }
+      }, delay);
+    }
+
+    function stopMixer() {
+      // Stop interval immediately
+      if (mixerInterval) {
+        clearInterval(mixerInterval);
+        mixerInterval = null;
+      }
+
+      // Stop all tracks immediately
+      Object.values(tracks).forEach(track => {
+        if (track) {
+          track.pause();
+          track.currentTime = 0;
+        }
+      });
+
+      // Reset volumes
+      Object.keys(targetVolumes).forEach(key => {
+        targetVolumes[key] = 0;
+        currentVolumes[key] = 0;
+      });
+    }
+
+    const settingsToggle = document.getElementById('settings-toggle');
+    let panelVisible = false;
+
+    if (audioToggle) {
+      audioToggle.addEventListener('click', () => {
+        if (!isPlaying) {
+          isPlaying = true;
+          startMixer();
+          audioToggle.classList.add('playing');
+          audioOn?.classList.remove('hidden');
+          audioOff?.classList.add('hidden');
+          settingsToggle?.classList.remove('hidden');
+        } else {
+          isPlaying = false;
+          stopMixer();
+          audioToggle.classList.remove('playing');
+          audioOn?.classList.add('hidden');
+          audioOff?.classList.remove('hidden');
+          settingsToggle?.classList.add('hidden');
+          audioPanel?.classList.add('hidden');
+          settingsToggle?.classList.remove('active');
+          panelVisible = false;
+        }
+      });
+    }
+
+    // Settings toggle to show/hide panel
+    if (settingsToggle) {
+      settingsToggle.addEventListener('click', () => {
+        panelVisible = !panelVisible;
+        if (panelVisible) {
+          audioPanel?.classList.remove('hidden');
+          settingsToggle.classList.add('active');
+        } else {
+          audioPanel?.classList.add('hidden');
+          settingsToggle.classList.remove('active');
+        }
+      });
+    }
+
+    // Volume slider control
+    if (volumeSlider) {
+      volumeSlider.addEventListener('input', () => {
+        masterVolume = parseInt(volumeSlider.value) / 100;
+      });
+    }
+
+    // Mood selector control
+    if (moodSelect) {
+      moodSelect.addEventListener('change', () => {
+        const selected = moodSelect.value;
+        if (selected === 'auto') {
+          autoMood = true;
+          setMood();
+          scheduleMoodChange();
+        } else {
+          autoMood = false;
+          setMoodByName(selected);
+        }
+      });
+    }
+
+    // Spooky Tub Easter Egg
+    const spookyTub = document.getElementById('spooky-tub') as HTMLElement;
+
+    if (spookyTub) {
+      let tubX = -200;
+      let tubState = 'hidden';
+      let facingRight = true;
+      let wanderTarget = { x: 0 };
+
+      function setDirection(right: boolean) {
+        facingRight = right;
+        if (right) {
+          spookyTub.classList.add('facing-right');
+          spookyTub.classList.remove('facing-left');
+        } else {
+          spookyTub.classList.add('facing-left');
+          spookyTub.classList.remove('facing-right');
+        }
+      }
+
+      function pickWanderTarget() {
+        const screenWidth = window.innerWidth;
+        // Wander along the bottom of the screen
+        wanderTarget = {
+          x: Math.random() * (screenWidth - 200)
+        };
+        setDirection(wanderTarget.x > tubX);
+      }
+
+      function wander() {
+        if (tubState !== 'wandering') return;
+
+        const dx = wanderTarget.x - tubX;
+        const distance = Math.abs(dx);
+
+        if (distance > 10) {
+          const speed = 1.5;
+          tubX += (dx / distance) * speed;
+          spookyTub.style.left = `${tubX}px`;
+          requestAnimationFrame(wander);
+        } else {
+          // Reached target, pause then pick new one
+          spookyTub.classList.remove('walking');
+          setTimeout(() => {
+            if (tubState === 'wandering') {
+              // Sometimes get spooked by lightning
+              if (Math.random() > 0.7) {
+                spookyTub.classList.add('spooked');
+                setTimeout(() => spookyTub.classList.remove('spooked'), 600);
+              }
+              pickWanderTarget();
+              spookyTub.classList.add('walking');
+              wander();
+            }
+          }, 2000 + Math.random() * 3000);
+        }
+      }
+
+      function startSpookyTub() {
+        tubX = -200;
+        spookyTub.style.left = `${tubX}px`;
+        spookyTub.classList.add('visible', 'walking', 'facing-right');
+        tubState = 'entering';
+
+        // Enter from left
+        const enterTarget = 30 + Math.random() * 80;
+        function enterScreen() {
+          if (tubX < enterTarget) {
+            tubX += 2;
+            spookyTub.style.left = `${tubX}px`;
+            requestAnimationFrame(enterScreen);
+          } else {
+            tubState = 'wandering';
+            pickWanderTarget();
+            wander();
+          }
+        }
+        enterScreen();
+      }
+
+      // Click to make Tub get spooked and run away
+      spookyTub.addEventListener('click', () => {
+        if (tubState === 'spooked' || tubState === 'fleeing' || tubState === 'peeking') return;
+
+        const previousState = tubState;
+        tubState = 'spooked';
+        spookyTub.classList.remove('walking');
+        spookyTub.classList.add('spooked');
+
+        // After jump animation, turn and flee
+        setTimeout(() => {
+          spookyTub.classList.remove('spooked');
+          tubState = 'fleeing';
+
+          // Turn opposite direction and run off screen
+          const fleeRight = tubX < window.innerWidth / 2;
+          setDirection(fleeRight);
+          const fleeTarget = fleeRight ? window.innerWidth + 50 : -250;
+
+          function flee() {
+            if (tubState !== 'fleeing') return;
+            const dx = fleeTarget - tubX;
+            if (Math.abs(dx) > 10) {
+              tubX += (dx > 0 ? 6 : -6); // Run fast!
+              spookyTub.style.left = `${tubX}px`;
+              requestAnimationFrame(flee);
+            } else {
+              // Off screen - now peek back
+              tubState = 'peeking';
+              spookyTub.classList.remove('visible');
+
+              setTimeout(() => {
+                // Peek from the edge
+                const peekFromRight = !fleeRight;
+                setDirection(!peekFromRight); // Face inward
+                tubX = peekFromRight ? window.innerWidth - 60 : -120;
+                spookyTub.style.left = `${tubX}px`;
+                spookyTub.classList.add('visible', 'peeking');
+
+                // After peeking, come back fully
+                setTimeout(() => {
+                  spookyTub.classList.remove('peeking');
+                  tubState = 'entering';
+                  const enterTarget = peekFromRight
+                    ? window.innerWidth - 220 - Math.random() * 100
+                    : 30 + Math.random() * 100;
+                  setDirection(!peekFromRight);
+
+                  function reenter() {
+                    if (tubState !== 'entering') return;
+                    const dx = enterTarget - tubX;
+                    if (Math.abs(dx) > 10) {
+                      tubX += (dx > 0 ? 2 : -2);
+                      spookyTub.style.left = `${tubX}px`;
+                      requestAnimationFrame(reenter);
+                    } else {
+                      tubState = 'wandering';
+                      spookyTub.classList.add('walking');
+                      pickWanderTarget();
+                      wander();
+                    }
+                  }
+                  spookyTub.classList.add('walking');
+                  reenter();
+                }, 1500);
+              }, 2000);
+            }
+          }
+          flee();
+        }, 500);
+      });
+
+      // Start after a delay
+      setTimeout(startSpookyTub, 5000);
+    }
+
+    // Form submission
+    const form = document.getElementById('story-form') as HTMLFormElement;
+    const successMsg = document.getElementById('form-success');
+    const errorMsg = document.getElementById('form-error');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = form.querySelector('.submit-btn') as HTMLButtonElement;
+      const btnText = form.querySelector('.btn-text') as HTMLElement;
+      const btnLoading = form.querySelector('.btn-loading') as HTMLElement;
+
+      submitBtn.disabled = true;
+      btnText?.classList.add('hidden');
+      btnLoading?.classList.remove('hidden');
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          successMsg?.classList.remove('hidden');
+          errorMsg?.classList.add('hidden');
+          form.reset();
+        } else {
+          throw new Error('Submission failed');
+        }
+      } catch (error) {
+        errorMsg?.classList.remove('hidden');
+        successMsg?.classList.add('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        btnText?.classList.remove('hidden');
+        btnLoading?.classList.add('hidden');
+      }
+    });
+  </script>
+</Layout>
