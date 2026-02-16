@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { Client } from '@notionhq/client';
 
 export const GET: APIRoute = async () => {
   const NOTION_TOKEN = process.env.NOTION_TOKEN || import.meta.env.NOTION_TOKEN;
@@ -12,11 +13,10 @@ export const GET: APIRoute = async () => {
   }
 
   try {
-    const { Client } = await import('@notionhq/client');
     const notion = new Client({ auth: NOTION_TOKEN });
 
-    const response = await notion.databases.query({
-      database_id: DATABASE_ID,
+    const response = await notion.dataSources.query({
+      data_source_id: DATABASE_ID,
       filter: {
         property: 'Published',
         checkbox: {
@@ -36,7 +36,7 @@ export const GET: APIRoute = async () => {
 
       return {
         id: page.id,
-        title: properties.Title?.title?.[0]?.plain_text || 'Untitled',
+        title: properties.Name?.title?.[0]?.plain_text || 'Untitled',
         content: properties.Content?.rich_text?.[0]?.plain_text || '',
         date: properties.Date?.date?.start || null,
         category: properties.Category?.select?.name || 'Uncategorized',
