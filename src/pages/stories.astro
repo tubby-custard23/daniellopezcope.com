@@ -1784,7 +1784,7 @@ import Layout from '../layouts/Layout.astro';
 
     function scheduleMoodChange() {
       if (!isPlaying || !autoMood) return;
-      const delay = 20000 + Math.random() * 20000;
+      const delay = 60000 + Math.random() * 60000; // 1-2 minutes per mood
       setTimeout(() => {
         if (isPlaying && autoMood) {
           setMood();
