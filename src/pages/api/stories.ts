@@ -48,7 +48,7 @@ export const GET: APIRoute = async () => {
       return {
         id: page.id,
         title: properties.Name?.title?.[0]?.plain_text || 'Untitled',
-        content: properties.Content?.rich_text?.[0]?.plain_text || '',
+        content: properties.Content?.rich_text?.map((block: any) => block.plain_text).join('') || '',
         date: properties.Date?.date?.start || null,
         category: properties.Category?.select?.name || 'Uncategorized',
         coverImage,
