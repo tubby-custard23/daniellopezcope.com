@@ -1339,10 +1339,12 @@ import Layout from '../layouts/Layout.astro';
       return Array.from(categories).sort();
     }
 
-    // Create preview text (first ~150 chars)
+    // Create preview text (first ~150 chars, strip HTML tags)
     function getPreview(content: string): string {
       if (!content) return '';
-      const cleaned = content.replace(/\n+/g, ' ').trim();
+      // Strip HTML tags for preview
+      const stripped = content.replace(/<[^>]*>/g, '');
+      const cleaned = stripped.replace(/\n+/g, ' ').trim();
       if (cleaned.length <= 150) return cleaned;
       return cleaned.substring(0, 150).trim() + '...';
     }
@@ -1408,7 +1410,8 @@ import Layout from '../layouts/Layout.astro';
         <span class="card-category">${story.category || 'Uncategorized'}</span>
         ${story.date ? `<span class="card-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>` : ''}
       `;
-      readerText.textContent = story.content;
+      // Convert newlines to <br> tags and set as HTML to render links
+      readerText.innerHTML = story.content.replace(/\n/g, '<br>');
 
       // Show reader
       reader.classList.remove('hidden');
