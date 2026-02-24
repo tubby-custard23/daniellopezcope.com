@@ -170,6 +170,76 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
           }
         }
 
+        // Check if a bone position (CSS right/bottom) would overlap any interactive element
+        // Includes buffer for the tub container that walks to the bone
+        function wouldOverlapButtons(boneRight: number, boneBottom: number) {
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
+          const isMobile = screenWidth < 768;
+          const boneW = 80;
+          const boneH = 35;
+          // On mobile, use a much larger buffer to account for the 640px tub container
+          const buffer = isMobile ? 80 : 20;
+          const boneLeft = screenWidth - boneRight - boneW;
+          const boneTop = screenHeight - boneBottom - boneH;
+
+          const interactives = document.querySelectorAll('a, button, [role="button"], .spotify-overlay');
+          for (const el of interactives) {
+            if ((el as HTMLElement).closest('.dachshund-container') || el === bone) continue;
+            const rect = el.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) continue;
+            if (
+              boneLeft < rect.right + buffer &&
+              boneLeft + boneW > rect.left - buffer &&
+              boneTop < rect.bottom + buffer &&
+              boneTop + boneH > rect.top - buffer
+            ) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        // Find a safe position for the bone, avoiding all interactive elements
+        function findSafePosition(): { right: number, bottom: number } {
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
+          const isMobile = screenWidth < 768;
+
+          const safeZones = isMobile ? [
+            { // Bottom right corner - only safe zone on mobile
+              rightMin: 10,
+              rightMax: Math.min(screenWidth * 0.35, screenWidth - 60),
+              bottomMin: 8,
+              bottomMax: 30
+            }
+          ] : [
+            { // Bottom right area
+              rightMin: 60,
+              rightMax: screenWidth * 0.35,
+              bottomMin: 30,
+              bottomMax: 120
+            },
+            { // Far right edge, slightly higher
+              rightMin: 60,
+              rightMax: screenWidth * 0.15,
+              bottomMin: 100,
+              bottomMax: 180
+            }
+          ];
+
+          let newRight: number, newBottom: number;
+          let attempts = 0;
+          do {
+            const zone = safeZones[Math.floor(Math.random() * safeZones.length)];
+            newRight = Math.random() * (zone.rightMax - zone.rightMin) + zone.rightMin;
+            newBottom = Math.random() * (zone.bottomMax - zone.bottomMin) + zone.bottomMin;
+            attempts++;
+          } while (wouldOverlapButtons(newRight, newBottom) && attempts < 15);
+
+          return { right: newRight, bottom: newBottom };
+        }
+
         let walkTargetX = 0;
         let walkTargetY = 0;
         let walkDirection = true;
@@ -227,8 +297,15 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
         }
 
         function startSequence() {
-          // Show bone
+          // Show bone and validate its initial position against interactive elements
           bone.classList.add('show');
+
+          // After CSS transition starts, check if the initial position overlaps any buttons
+          requestAnimationFrame(() => {
+            const pos = findSafePosition();
+            bone.style.right = `${pos.right}px`;
+            bone.style.bottom = `${pos.bottom}px`;
+          });
 
           // Tub enters after a moment
           setTimeout(() => {
@@ -252,72 +329,11 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
             // Bounce bone to a random position in safe zones
             bone.classList.add('bouncing');
 
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            const isMobile = screenWidth < 768;
-
-            // Safe zones: keep bone low and on the right side of the screen
-            // Avoids: Spotify button (bottom-left), centered nav buttons, nav bar (top)
-            const safeZones = isMobile ? [
-              { // Bottom right corner - only safe zone on mobile
-                rightMin: 20,
-                rightMax: Math.min(screenWidth * 0.4, screenWidth - 80),
-                bottomMin: 20,
-                bottomMax: 70
-              }
-            ] : [
-              { // Bottom right area
-                rightMin: 60,
-                rightMax: screenWidth * 0.35,
-                bottomMin: 30,
-                bottomMax: 120
-              },
-              { // Far right edge, slightly higher
-                rightMin: 60,
-                rightMax: screenWidth * 0.15,
-                bottomMin: 100,
-                bottomMax: 180
-              }
-            ];
-
-            // Check if bone position would overlap any interactive elements
-            function wouldOverlapButtons(boneRight: number, boneBottom: number) {
-              const boneW = 80;
-              const boneH = 35;
-              const buffer = 20;
-              const boneLeft = screenWidth - boneRight - boneW;
-              const boneTop = screenHeight - boneBottom - boneH;
-
-              const interactives = document.querySelectorAll('a, button, [role="button"], .spotify-overlay');
-              for (const el of interactives) {
-                if ((el as HTMLElement).closest('.dachshund-container') || el === bone) continue;
-                const rect = el.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) continue;
-                if (
-                  boneLeft < rect.right + buffer &&
-                  boneLeft + boneW > rect.left - buffer &&
-                  boneTop < rect.bottom + buffer &&
-                  boneTop + boneH > rect.top - buffer
-                ) {
-                  return true;
-                }
-              }
-              return false;
-            }
-
-            // Pick a safe position, retry if it overlaps interactive elements
-            let newRight: number, newBottom: number;
-            let attempts = 0;
-            do {
-              const zone = safeZones[Math.floor(Math.random() * safeZones.length)];
-              newRight = Math.random() * (zone.rightMax - zone.rightMin) + zone.rightMin;
-              newBottom = Math.random() * (zone.bottomMax - zone.bottomMin) + zone.bottomMin;
-              attempts++;
-            } while (wouldOverlapButtons(newRight, newBottom) && attempts < 10);
+            const pos = findSafePosition();
 
             setTimeout(() => {
-              bone.style.right = `${newRight}px`;
-              bone.style.bottom = `${newBottom}px`;
+              bone.style.right = `${pos.right}px`;
+              bone.style.bottom = `${pos.bottom}px`;
               bone.classList.remove('bouncing');
 
               // Tub looks around first, then follows
