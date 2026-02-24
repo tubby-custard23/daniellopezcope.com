@@ -1995,7 +1995,7 @@ import Layout from '../layouts/Layout.astro';
                 // Peek from the edge
                 const peekFromRight = !fleeRight;
                 setDirection(!peekFromRight); // Face inward
-                tubX = peekFromRight ? window.innerWidth - 60 : -120;
+                tubX = peekFromRight ? window.innerWidth - 120 : -120;
                 spookyTub.style.left = `${tubX}px`;
                 spookyTub.classList.add('visible', 'peeking');
 

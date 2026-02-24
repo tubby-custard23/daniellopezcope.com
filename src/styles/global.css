@@ -1208,7 +1208,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 640px;
   height: 360px;
   z-index: 1000;
-  cursor: pointer;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease;
 }
