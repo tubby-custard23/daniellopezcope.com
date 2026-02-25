@@ -12,6 +12,10 @@
 }
 
 /* Base styles */
+*, *::before, *::after {
+  border-color: transparent;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -296,6 +300,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #fff;
   margin-bottom: 0.5rem;
   animation: gentle-pulse 3s ease-in-out infinite;
+  transition: color 0.15s ease;
 }
 
 @keyframes gentle-pulse {

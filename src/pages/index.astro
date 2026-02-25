@@ -242,6 +242,7 @@ import Layout from '../layouts/Layout.astro';
       const colorOverlay = document.getElementById('color-overlay');
       const revealedContent = document.getElementById('revealed-content');
       const ringProgress = document.getElementById('ring-progress');
+      const welcomeText = document.querySelector('.welcome-text') as HTMLElement;
 
       let holdProgress = 0;
       let holdInterval: ReturnType<typeof setInterval> | null = null;
@@ -434,6 +435,19 @@ import Layout from '../layouts/Layout.astro';
           } else {
             sunburst.classList.remove('active');
           }
+        }
+
+        // Shift welcome text color as sunburst's bright core expands behind it
+        // White → warm gold → deep crimson for contrast against the white-gold center
+        if (welcomeText) {
+          const t = Math.min(progress / 100, 1);
+          // Ease-in curve so color shifts slowly at first, then more dramatically
+          const eased = t * t;
+          // Interpolate: #fff (255,255,255) → #8B1A1A (139,26,26) deep crimson
+          const r = Math.round(255 - (255 - 139) * eased);
+          const g = Math.round(255 - (255 - 26) * eased);
+          const b = Math.round(255 - (255 - 26) * eased);
+          welcomeText.style.color = `rgb(${r}, ${g}, ${b})`;
         }
 
         // Reveal landscape gradually - like a sunrise

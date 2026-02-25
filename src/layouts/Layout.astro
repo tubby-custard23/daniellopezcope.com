@@ -214,17 +214,17 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
               bottomMax: 30
             }
           ] : [
-            { // Bottom right area
-              rightMin: 60,
-              rightMax: screenWidth * 0.35,
-              bottomMin: 30,
-              bottomMax: 120
+            { // Far bottom right - keeps tub (640px) away from centered buttons
+              rightMin: 40,
+              rightMax: Math.min(screenWidth * 0.1, 160),
+              bottomMin: 20,
+              bottomMax: 100
             },
-            { // Far right edge, slightly higher
-              rightMin: 60,
-              rightMax: screenWidth * 0.15,
-              bottomMin: 100,
-              bottomMax: 180
+            { // Slightly higher, still far right
+              rightMin: 40,
+              rightMax: Math.min(screenWidth * 0.08, 130),
+              bottomMin: 80,
+              bottomMax: 160
             }
           ];
 
