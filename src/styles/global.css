@@ -19,6 +19,12 @@
 html {
   scroll-behavior: smooth;
   background-color: var(--color-deep-black);
+  overflow: hidden;
+}
+
+html.scrollable {
+  overflow: visible;
+  overflow-x: hidden;
 }
 
 body {
@@ -42,10 +48,10 @@ h1, h2, h3, h4, h5, h6 {
 .landscape-bg {
   --reveal-progress: 0;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   background-image: url('/images/avila.svg');
   background-size: cover;
   background-position: center;
@@ -66,10 +72,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Color overlay - warm golden tint after sunburst */
 .color-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   background: linear-gradient(
     135deg,
     rgba(255, 217, 61, 0.15) 0%,
@@ -91,10 +97,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Black overlay that fades out */
 .black-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   background: #000;
   z-index: 5;
   transition: opacity 1.2s ease;
@@ -515,10 +521,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .fog-canvas {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   pointer-events: none;
   z-index: 10;
   transition: opacity 2s ease;
@@ -1113,10 +1119,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Semi-transparent overlay for inner pages (legacy support) */
 .landscape-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
   background: linear-gradient(
     135deg,
     rgba(122, 158, 159, 0.25) 0%,

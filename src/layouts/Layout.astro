@@ -12,7 +12,7 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class={showNav ? 'scrollable' : ''}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -207,24 +207,30 @@ const { title, showNav = false, showLandscape = false, showTub = true } = Astro.
           const isMobile = screenWidth < 768;
 
           const safeZones = isMobile ? [
-            { // Bottom right corner - only safe zone on mobile
+            { // Bottom right corner on mobile
               rightMin: 10,
               rightMax: Math.min(screenWidth * 0.35, screenWidth - 60),
               bottomMin: 8,
               bottomMax: 30
             }
           ] : [
-            { // Far bottom right - keeps tub (640px) away from centered buttons
-              rightMin: 40,
-              rightMax: Math.min(screenWidth * 0.1, 160),
-              bottomMin: 20,
-              bottomMax: 100
+            { // Bottom right
+              rightMin: 30,
+              rightMax: Math.min(screenWidth * 0.2, 350),
+              bottomMin: 15,
+              bottomMax: 80
             },
-            { // Slightly higher, still far right
-              rightMin: 40,
-              rightMax: Math.min(screenWidth * 0.08, 130),
-              bottomMin: 80,
-              bottomMax: 160
+            { // Mid-right, higher up
+              rightMin: 30,
+              rightMax: Math.min(screenWidth * 0.18, 300),
+              bottomMin: 100,
+              bottomMax: 250
+            },
+            { // Far right, mid height
+              rightMin: 30,
+              rightMax: Math.min(screenWidth * 0.12, 200),
+              bottomMin: 200,
+              bottomMax: Math.min(screenHeight * 0.4, 350)
             }
           ];
 

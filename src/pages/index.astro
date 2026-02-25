@@ -550,6 +550,7 @@ import Layout from '../layouts/Layout.astro';
         setTimeout(() => {
           revealedContent?.classList.add('show');
           sessionStorage.setItem('introSeen', 'true');
+          document.documentElement.classList.add('scrollable');
         }, 1300);
       }
 
@@ -565,6 +566,7 @@ import Layout from '../layouts/Layout.astro';
         landscapeBg?.classList.add('revealed');
         colorOverlay?.classList.add('show');
         revealedContent?.classList.add('show');
+        document.documentElement.classList.add('scrollable');
       } else if (welcomeCircle) {
         welcomeCircle.addEventListener('mousedown', startHold);
         welcomeCircle.addEventListener('mouseup', stopHold);
