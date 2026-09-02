@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { Client } from '@notionhq/client';
 
+export const prerender = false;
+
 // Convert Notion rich_text to HTML, preserving links and basic formatting
 function richTextToHtml(richText: any[]): string {
   if (!richText || !Array.isArray(richText)) return '';
@@ -39,7 +41,7 @@ export const GET: APIRoute = async () => {
   if (!NOTION_TOKEN || !DATABASE_ID) {
     return new Response(JSON.stringify({ error: 'Missing Notion credentials' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
   }
 
@@ -88,13 +90,16 @@ export const GET: APIRoute = async () => {
 
     return new Response(JSON.stringify({ stories }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300'
+      }
     });
   } catch (error) {
     console.error('Notion API error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch stories' }), {
+    return new Response(JSON.stringify({ error: 'Failed to fetch stories', details: String(error) }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
   }
 };
