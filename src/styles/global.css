@@ -1237,6 +1237,10 @@ h1, h2, h3, h4, h5, h6 {
   animation: tub-look 0.4s ease-in-out 2;
 }
 
+.dachshund-container.begging {
+  animation: tub-beg 0.6s ease-in-out infinite;
+}
+
 @keyframes tub-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
@@ -1246,6 +1250,11 @@ h1, h2, h3, h4, h5, h6 {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-5deg); }
   75% { transform: rotate(5deg); }
+}
+
+@keyframes tub-beg {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-3deg); }
 }
 
 /* Tub images - show/hide based on direction */
@@ -1266,33 +1275,42 @@ h1, h2, h3, h4, h5, h6 {
 .dachshund-container.facing-left .tub-right { display: none; }
 .dachshund-container.facing-left .tub-left { display: block; }
 
-/* Bone styles */
+/* Bone - a draggable toy that lives on the ground; Tub chases wherever it lands */
 .bone {
   position: fixed;
-  bottom: 30px;
-  right: -100px;
+  bottom: 24px;
+  left: -200px;
   width: 80px;
   height: 35px;
   opacity: 0;
-  transition: right 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), bottom 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease;
-  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.15s ease;
+  cursor: grab;
   z-index: 1001;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
 }
 
 .bone.show {
-  right: 80px;
   opacity: 1;
 }
 
-.bone.bouncing {
-  animation: bone-bounce 0.3s ease-out;
+.bone.dragging {
+  cursor: grabbing;
+  transform: scale(1.15) rotate(-12deg);
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.55));
 }
 
-@keyframes bone-bounce {
-  0% { transform: scale(1) rotate(0deg); }
-  30% { transform: scale(1.3) rotate(-20deg) translateY(-30px); }
-  60% { transform: scale(1.1) rotate(15deg) translateY(-15px); }
-  100% { transform: scale(1) rotate(0deg) translateY(0); }
+.bone.landing {
+  animation: bone-land 0.28s ease-out;
+}
+
+@keyframes bone-land {
+  0% { transform: scale(1.18, 0.78) translateY(4px); }
+  55% { transform: scale(0.94, 1.08) translateY(-2px); }
+  100% { transform: scale(1, 1) translateY(0); }
 }
 
 /* Scrollbar */
@@ -1311,95 +1329,6 @@ h1, h2, h3, h4, h5, h6 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-caramel);
-}
-
-/* Spotify Player Overlay */
-.spotify-overlay {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  pointer-events: none;
-}
-
-.spotify-overlay.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.spotify-toggle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(30, 215, 96, 0.9), rgba(25, 185, 84, 0.95));
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(30, 215, 96, 0.3);
-  transition: all 0.3s ease;
-}
-
-.spotify-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 28px rgba(30, 215, 96, 0.4);
-}
-
-.spotify-toggle .toggle-icon {
-  font-size: 1.5rem;
-  transition: transform 0.3s ease;
-}
-
-.spotify-overlay.expanded .spotify-toggle .toggle-icon {
-  transform: rotate(180deg);
-}
-
-.spotify-player {
-  width: 320px;
-  max-height: 0;
-  overflow: hidden;
-  margin-top: 12px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  transition: max-height 0.4s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-
-.spotify-overlay.expanded .spotify-player {
-  max-height: 380px;
-  opacity: 1;
-}
-
-.spotify-player iframe {
-  display: block;
-}
-
-/* Mobile adjustments */
-@media (max-width: 640px) {
-  .spotify-overlay {
-    bottom: 12px;
-    left: 12px;
-  }
-
-  .spotify-player {
-    width: 280px;
-  }
-
-  .spotify-toggle {
-    width: 44px;
-    height: 44px;
-  }
 }
 
 /* Navigation mobile menu overlay */

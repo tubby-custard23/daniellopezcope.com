@@ -99,25 +99,6 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
       </>
     )}
 
-    <!-- Spotify Player Overlay -->
-    <div id="spotify-overlay" class="spotify-overlay">
-      <button id="spotify-toggle" class="spotify-toggle" aria-label="Toggle music player">
-        <span class="toggle-icon">🎵</span>
-      </button>
-      <div id="spotify-player" class="spotify-player">
-        <iframe
-          style="border-radius:12px"
-          src="https://open.spotify.com/embed/playlist/3CKSR1GENr32zq16LkbNeK?utm_source=generator&theme=0"
-          width="100%"
-          height="352"
-          frameBorder="0"
-          allowfullscreen=""
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-        ></iframe>
-      </div>
-    </div>
-
     <script>
       // Nav mobile menu toggle
       document.addEventListener('DOMContentLoaded', () => {
@@ -148,262 +129,268 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
         });
       });
 
-      // Dachshund (Tub) Easter egg - appears after intro or on inner pages
+      // Dachshund (Tub) Easter egg - drag the bone anywhere, drop it, Tub trots over
       document.addEventListener('DOMContentLoaded', () => {
-        const dachshund = document.getElementById('dachshund') as HTMLElement;
-        const bone = document.getElementById('bone') as HTMLElement;
+        const dachshund = document.getElementById('dachshund') as HTMLElement | null;
+        const bone = document.getElementById('bone') as HTMLElement | null;
 
-        if (!dachshund || !bone) return;
+        if (dachshund && bone) {
+          const BONE_W = 80;
+          const BONE_H = 35;
+          const GROUND = 24;         // css bottom the bone always comes to rest at
+          const GRAVITY = 0.9;
+          const BOUNCE = 0.35;
+          const TUB_W = 640;
+          const NOSE_RIGHT = 375;    // container left offset that puts his nose on the bone
+          const NOSE_LEFT = 150;
+          const FLIP_THRESHOLD = 60; // hysteresis so he doesn't flip-flop in place
+          const ARRIVE = 12;
 
-        let tubX = -650;
-        let tubY = -150; // bottom offset
-        let tubState = 'hidden';
-        let facingRight = true;
+          let boneX = -200;
+          let boneY = GROUND;
+          let boneVX = 0;
+          let boneVY = 0;
+          let falling = false;
+          let dragging = false;
+          let grabDX = 0;
+          let grabDY = 0;
+          let lastPointerX = 0;
+          let dragDistance = 0;
 
-        function setDirection(right: boolean) {
-          facingRight = right;
-          if (right) {
-            dachshund.classList.add('facing-right');
-            dachshund.classList.remove('facing-left');
-          } else {
-            dachshund.classList.add('facing-left');
-            dachshund.classList.remove('facing-right');
+          let tubX = -650;
+          const tubY = GROUND - 150;
+          let facingRight = true;
+          let walking = false;
+          let atBone = false;
+          let ticking = false;
+
+          function clamp(v: number, min: number, max: number) {
+            return Math.min(Math.max(v, min), max);
           }
-        }
 
-        // Check if a bone position (CSS right/bottom) would overlap any interactive element
-        // Includes buffer for the tub container that walks to the bone
-        function wouldOverlapButtons(boneRight: number, boneBottom: number) {
-          const screenWidth = window.innerWidth;
-          const screenHeight = window.innerHeight;
-          const isMobile = screenWidth < 768;
-          const boneW = 80;
-          const boneH = 35;
-          // On mobile, use a much larger buffer to account for the 640px tub container
-          const buffer = isMobile ? 80 : 20;
-          const boneLeft = screenWidth - boneRight - boneW;
-          const boneTop = screenHeight - boneBottom - boneH;
+          function maxBoneX() {
+            return Math.max(0, window.innerWidth - BONE_W);
+          }
 
-          const interactives = document.querySelectorAll('a, button, [role="button"], .spotify-overlay');
-          for (const el of interactives) {
-            if ((el as HTMLElement).closest('.dachshund-container') || el === bone) continue;
-            const rect = el.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) continue;
-            if (
-              boneLeft < rect.right + buffer &&
-              boneLeft + boneW > rect.left - buffer &&
-              boneTop < rect.bottom + buffer &&
-              boneTop + boneH > rect.top - buffer
-            ) {
+          function setDirection(right: boolean) {
+            facingRight = right;
+            dachshund.classList.toggle('facing-right', right);
+            dachshund.classList.toggle('facing-left', !right);
+          }
+
+          // The bone should never come to rest on top of something clickable
+          function overlapsInteractive(x: number, y: number) {
+            const left = x;
+            const top = window.innerHeight - y - BONE_H;
+            const pad = 8;
+            const interactives = document.querySelectorAll('a, button, [role="button"], input, select, textarea');
+            for (const el of interactives) {
+              if ((el as HTMLElement).closest('.dachshund-container') || el === bone) continue;
+              const rect = el.getBoundingClientRect();
+              if (rect.width === 0 || rect.height === 0) continue;
+              if (
+                left < rect.right + pad &&
+                left + BONE_W > rect.left - pad &&
+                top < rect.bottom + pad &&
+                top + BONE_H > rect.top - pad
+              ) {
+                return true;
+              }
+            }
+            return false;
+          }
+
+          // Roll the bone sideways to the nearest clear spot after it lands
+          function rollClear() {
+            if (!overlapsInteractive(boneX, boneY)) return;
+            const limit = maxBoneX();
+            for (let step = 20; step <= 500; step += 20) {
+              for (const candidate of [boneX + step, boneX - step]) {
+                const x = clamp(candidate, 0, limit);
+                if (!overlapsInteractive(x, boneY)) {
+                  boneX = x;
+                  return;
+                }
+              }
+            }
+          }
+
+          function render() {
+            bone.style.left = `${boneX}px`;
+            bone.style.bottom = `${boneY}px`;
+            dachshund.style.left = `${tubX}px`;
+            dachshund.style.bottom = `${tubY}px`;
+          }
+
+          function tick() {
+            // Bone physics - only while it's in the air and not being held
+            if (!dragging && falling) {
+              boneVY -= GRAVITY;
+              boneY += boneVY;
+              boneX = clamp(boneX + boneVX, 0, maxBoneX());
+              boneVX *= 0.94;
+
+              if (boneY <= GROUND) {
+                boneY = GROUND;
+                if (Math.abs(boneVY) > 4) {
+                  boneVY = Math.abs(boneVY) * BOUNCE;
+                } else {
+                  boneVY = 0;
+                  boneVX = 0;
+                  falling = false;
+                  rollClear();
+                  bone.classList.remove('landing');
+                  void bone.getBoundingClientRect();
+                  bone.classList.add('landing');
+                }
+              }
+            }
+
+            // Tub tracks the bone horizontally along the ground
+            const diff = (boneX + BONE_W / 2) - (tubX + TUB_W / 2);
+            if (Math.abs(diff) > FLIP_THRESHOLD) setDirection(diff > 0);
+
+            const targetX = boneX - (facingRight ? NOSE_RIGHT : NOSE_LEFT);
+            const dx = targetX - tubX;
+
+            if (Math.abs(dx) > ARRIVE) {
+              const speed = Math.min(6, Math.abs(dx) * 0.04 + 1.5);
+              tubX += Math.sign(dx) * speed;
+              atBone = false;
+              if (!walking) {
+                walking = true;
+                dachshund.classList.add('walking');
+              }
+            } else {
+              tubX = targetX;
+              atBone = true;
+              if (walking) {
+                walking = false;
+                dachshund.classList.remove('walking');
+              }
+            }
+
+            // Beg when the bone is dangled overhead
+            dachshund.classList.toggle('begging', dragging && atBone && boneY > GROUND + 60);
+
+            render();
+
+            // Nothing left to animate - park the loop until the bone moves again
+            if (!dragging && !falling && atBone) {
+              ticking = false;
+              return;
+            }
+            requestAnimationFrame(tick);
+          }
+
+          function kick() {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(tick);
+          }
+
+          // --- Drag and drop -----------------------------------------------
+          bone.addEventListener('pointerdown', (e) => {
+            const evt = e as PointerEvent;
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            dragging = true;
+            falling = false;
+            boneVX = 0;
+            boneVY = 0;
+            dragDistance = 0;
+            lastPointerX = evt.clientX;
+
+            const rect = bone.getBoundingClientRect();
+            grabDX = evt.clientX - rect.left;
+            grabDY = evt.clientY - rect.top;
+
+            bone.classList.remove('landing');
+            bone.classList.add('dragging');
+            kick();
+            try { bone.setPointerCapture(evt.pointerId); } catch (err) { /* no capture support */ }
+          });
+
+          bone.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const evt = e as PointerEvent;
+            const nextX = clamp(evt.clientX - grabDX, 0, maxBoneX());
+            const nextY = clamp(
+              window.innerHeight - (evt.clientY - grabDY) - BONE_H,
+              GROUND,
+              Math.max(GROUND, window.innerHeight - BONE_H - 10)
+            );
+
+            dragDistance += Math.abs(nextX - boneX) + Math.abs(nextY - boneY);
+            boneVX = (evt.clientX - lastPointerX) * 0.5;
+            lastPointerX = evt.clientX;
+            boneX = nextX;
+            boneY = nextY;
+            kick();
+          });
+
+          function endDrag() {
+            if (!dragging) return;
+            dragging = false;
+            bone.classList.remove('dragging');
+            dachshund.classList.remove('begging');
+
+            // A plain tap still does something: toss the bone a short hop
+            if (dragDistance < 6) {
+              boneVY = 10;
+              boneVX = (Math.random() - 0.5) * 8;
+            }
+            falling = true;
+            kick();
+          }
+
+          bone.addEventListener('pointerup', endDrag);
+          bone.addEventListener('pointercancel', endDrag);
+          bone.addEventListener('lostpointercapture', endDrag);
+
+          window.addEventListener('resize', () => {
+            boneX = clamp(boneX, 0, maxBoneX());
+            atBone = false;
+            kick();
+          });
+
+          function startSequence() {
+            boneX = clamp(window.innerWidth - 160, 0, maxBoneX());
+            boneY = Math.min(window.innerHeight * 0.55, 420);
+            boneVX = 0;
+            boneVY = 0;
+            falling = true;
+
+            tubX = -650;
+            setDirection(true);
+            render();
+            bone.classList.add('show');
+            kick();
+
+            setTimeout(() => {
+              dachshund.classList.add('visible');
+            }, 500);
+          }
+
+          // Check if we should start
+          function checkAndStart() {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const introSeen = sessionStorage.getItem('introSeen');
+
+            if (!welcomeScreen || introSeen === 'true') {
+              setTimeout(startSequence, 4000);
               return true;
             }
-          }
-          return false;
-        }
-
-        // Find a safe position for the bone, avoiding all interactive elements
-        function findSafePosition(): { right: number, bottom: number } {
-          const screenWidth = window.innerWidth;
-          const screenHeight = window.innerHeight;
-          const isMobile = screenWidth < 768;
-
-          const safeZones = isMobile ? [
-            { // Bottom right corner on mobile
-              rightMin: 10,
-              rightMax: Math.min(screenWidth * 0.35, screenWidth - 60),
-              bottomMin: 8,
-              bottomMax: 30
-            }
-          ] : [
-            { // Bottom right
-              rightMin: 30,
-              rightMax: Math.min(screenWidth * 0.2, 350),
-              bottomMin: 15,
-              bottomMax: 80
-            },
-            { // Mid-right, higher up
-              rightMin: 30,
-              rightMax: Math.min(screenWidth * 0.18, 300),
-              bottomMin: 100,
-              bottomMax: 250
-            },
-            { // Far right, mid height
-              rightMin: 30,
-              rightMax: Math.min(screenWidth * 0.12, 200),
-              bottomMin: 200,
-              bottomMax: Math.min(screenHeight * 0.4, 350)
-            }
-          ];
-
-          let newRight: number, newBottom: number;
-          let attempts = 0;
-          do {
-            const zone = safeZones[Math.floor(Math.random() * safeZones.length)];
-            newRight = Math.random() * (zone.rightMax - zone.rightMin) + zone.rightMin;
-            newBottom = Math.random() * (zone.bottomMax - zone.bottomMin) + zone.bottomMin;
-            attempts++;
-          } while (wouldOverlapButtons(newRight, newBottom) && attempts < 15);
-
-          return { right: newRight, bottom: newBottom };
-        }
-
-        let walkTargetX = 0;
-        let walkTargetY = 0;
-        let walkDirection = true;
-
-        function startWalkToBone() {
-          const boneRect = bone.getBoundingClientRect();
-          const boneLeftPos = boneRect.left;
-          const boneCenterX = boneLeftPos + boneRect.width / 2;
-          const tubCenterX = tubX + 320;
-
-          // Determine approach direction based on current position
-          // Tub approaches from whichever side he's on
-          walkDirection = tubCenterX < boneCenterX;
-          setDirection(walkDirection);
-
-          // Set target X: position Tub so his nose is near the bone
-          // If approaching from left (facing right): stop with nose at bone
-          // If approaching from right (facing left): stop with nose at bone
-          walkTargetX = walkDirection ? boneLeftPos - 375 : boneLeftPos - 150;
-
-          // Target Y: align Tub's center with bone
-          const boneBottom = window.innerHeight - boneRect.bottom;
-          walkTargetY = boneBottom - 150;
-
-          tubState = 'walking';
-          dachshund.classList.add('walking');
-          walkToBone();
-        }
-
-        function walkToBone() {
-          if (tubState !== 'walking') return;
-
-          const distanceX = walkTargetX - tubX;
-          const distanceY = walkTargetY - tubY;
-          const totalDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-          if (totalDistance > 15) {
-            // Move toward target
-            const speed = Math.min(5, totalDistance * 0.04 + 1.5);
-            const ratio = speed / totalDistance;
-            tubX += distanceX * ratio;
-            tubY += distanceY * ratio;
-            dachshund.style.left = `${tubX}px`;
-            dachshund.style.bottom = `${tubY}px`;
-            requestAnimationFrame(walkToBone);
-          } else {
-            // Arrived at bone
-            tubX = walkTargetX;
-            tubY = walkTargetY;
-            dachshund.style.left = `${tubX}px`;
-            dachshund.style.bottom = `${tubY}px`;
-            tubState = 'atBone';
-            dachshund.classList.remove('walking');
-          }
-        }
-
-        function startSequence() {
-          // Show bone and validate its initial position against interactive elements
-          bone.classList.add('show');
-
-          // After CSS transition starts, check if the initial position overlaps any buttons
-          requestAnimationFrame(() => {
-            const pos = findSafePosition();
-            bone.style.right = `${pos.right}px`;
-            bone.style.bottom = `${pos.bottom}px`;
-          });
-
-          // Tub enters after a moment
-          setTimeout(() => {
-            tubX = -650;
-            dachshund.style.left = `${tubX}px`;
-            dachshund.classList.add('visible');
-            dachshund.classList.add('walking');
-            setDirection(true); // Start facing right
-
-            setTimeout(() => {
-              startWalkToBone();
-            }, 200);
-          }, 800);
-        }
-
-        // Bone click handler - bounces to safe zones (avoiding center content area)
-        bone.addEventListener('click', (e) => {
-          e.stopPropagation();
-
-          if (tubState === 'atBone') {
-            // Bounce bone to a random position in safe zones
-            bone.classList.add('bouncing');
-
-            const pos = findSafePosition();
-
-            setTimeout(() => {
-              bone.style.right = `${pos.right}px`;
-              bone.style.bottom = `${pos.bottom}px`;
-              bone.classList.remove('bouncing');
-
-              // Tub looks around first, then follows
-              dachshund.classList.add('looking');
-
-              setTimeout(() => {
-                dachshund.classList.remove('looking');
-                startWalkToBone();
-              }, 800);
-            }, 300);
-          }
-        });
-
-        // Check if we should start
-        function checkAndStart() {
-          const welcomeScreen = document.getElementById('welcome-screen');
-          const introSeen = sessionStorage.getItem('introSeen');
-
-          if (!welcomeScreen || introSeen === 'true') {
-            setTimeout(startSequence, 4000);
-            return true;
-          }
-          return false;
-        }
-
-        // Try to start, or watch for intro completion
-        if (!checkAndStart()) {
-          const checkInterval = setInterval(() => {
-            if (sessionStorage.getItem('introSeen') === 'true') {
-              clearInterval(checkInterval);
-              setTimeout(startSequence, 2000);
-            }
-          }, 500);
-        }
-
-        // Spotify overlay functionality
-        const spotifyOverlay = document.getElementById('spotify-overlay');
-        const spotifyToggle = document.getElementById('spotify-toggle');
-
-        if (spotifyOverlay && spotifyToggle) {
-          // Toggle expanded state
-          spotifyToggle.addEventListener('click', () => {
-            spotifyOverlay.classList.toggle('expanded');
-          });
-
-          // Show overlay after intro or immediately on inner pages
-          function showSpotifyOverlay() {
-            setTimeout(() => {
-              spotifyOverlay.classList.add('show');
-            }, 1500);
+            return false;
           }
 
-          const welcomeScreen = document.getElementById('welcome-screen');
-          const introSeen = sessionStorage.getItem('introSeen');
-
-          if (!welcomeScreen || introSeen === 'true') {
-            showSpotifyOverlay();
-          } else {
-            // Watch for intro completion
-            const spotifyCheckInterval = setInterval(() => {
+          // Try to start, or watch for intro completion
+          if (!checkAndStart()) {
+            const checkInterval = setInterval(() => {
               if (sessionStorage.getItem('introSeen') === 'true') {
-                clearInterval(spotifyCheckInterval);
-                showSpotifyOverlay();
+                clearInterval(checkInterval);
+                setTimeout(startSequence, 2000);
               }
             }, 500);
           }
