@@ -12,6 +12,14 @@
  */
 
 import { setRain } from './rain';
+import { defineTweaks, tweak, onTweakChange } from './tweaks';
+
+/* 0 auto, 1 force day, 2 force night. A slider is a blunt control for a
+   mode, but it means the theme can be compared both ways instantly rather
+   than through a deploy. */
+defineTweaks([
+  { group: 'sky', key: 'sky.mode', label: '0 auto / 1 day / 2 night', min: 0, max: 2, step: 1, value: 0 },
+]);
 
 export type Sky = {
   place: string;
@@ -71,7 +79,10 @@ export function applySky(sky: Sky | null) {
 
   const root = document.documentElement;
   const cloud = Math.min(1, Math.max(0, sky.cloudCover / 100));
-  const daylight = sky.isDay && pageWantsDaylight();
+
+  const mode = tweak('sky.mode');
+  const wantsDay = mode === 1 ? true : mode === 2 ? false : sky.isDay;
+  const daylight = wantsDay && pageWantsDaylight();
 
   const stops = daylight
     ? blendStops(DAY_CLEAR, DAY_OVERCAST, cloud)
@@ -115,6 +126,9 @@ function writeCache(sky: Sky) {
  * light, because the markup defaults to the night palette.
  */
 export async function startSky() {
+  // re-paint when the mode knob moves
+  onTweakChange(() => applySky(current));
+
   const cached = readCache();
   if (cached) applySky(cached);
 

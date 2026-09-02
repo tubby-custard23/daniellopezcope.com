@@ -1432,54 +1432,87 @@ html.night body {
   background-attachment: fixed;
 }
 
-/* The site is written in white-on-dark utilities, so daylight inverts the
-   ink rather than restyling every component. */
+/* Daylight has to do two things, and the first attempt only did one.
+   Inverting the ink is easy. But contrast on this site never came from a
+   dark scrim - .landscape-overlay is a warm tint - it came from the cards
+   themselves being near-opaque dark brown. Invert the text without also
+   lightening the cards and you get dark ink on a dark card. */
+
 html.day body { color: #241c14; }
 
 html.day .text-white { color: #241c14 !important; }
 html.day .text-white\/90 { color: rgba(36, 28, 20, 0.9) !important; }
 html.day .text-white\/80 { color: rgba(36, 28, 20, 0.84) !important; }
-html.day .text-white\/70 { color: rgba(36, 28, 20, 0.76) !important; }
-html.day .text-white\/60 { color: rgba(36, 28, 20, 0.68) !important; }
-html.day .text-white\/50 { color: rgba(36, 28, 20, 0.6) !important; }
-html.day .text-white\/40 { color: rgba(36, 28, 20, 0.52) !important; }
-html.day .text-white\/30 { color: rgba(36, 28, 20, 0.44) !important; }
-html.day .text-dusty-teal { color: #2c6a6d !important; }
+html.day .text-white\/70 { color: rgba(36, 28, 20, 0.78) !important; }
+html.day .text-white\/60 { color: rgba(36, 28, 20, 0.72) !important; }
+html.day .text-white\/50 { color: rgba(36, 28, 20, 0.66) !important; }
+html.day .text-white\/40 { color: rgba(36, 28, 20, 0.58) !important; }
+html.day .text-white\/30 { color: rgba(36, 28, 20, 0.5) !important; }
+html.day .text-dusty-teal { color: #245b5e !important; }
 
 html.day .border-white\/10 { border-color: rgba(36, 28, 20, 0.14) !important; }
 html.day .border-white\/30 { border-color: rgba(36, 28, 20, 0.25) !important; }
-html.day .bg-black\/60 { background-color: rgba(252, 250, 245, 0.78) !important; }
 
-html.day .card {
-  background: rgba(255, 253, 248, 0.74);
-  border-color: rgba(74, 55, 40, 0.18);
-  box-shadow: 0 6px 26px rgba(74, 55, 40, 0.09);
+/* Custom classes carry their own white, so utilities alone miss them */
+html.day .nav-link { color: rgba(36, 28, 20, 0.78); }
+html.day .nav-link:hover { color: #245b5e; }
+html.day .nav-mobile-link { color: rgba(36, 28, 20, 0.85); }
+html.day .nav-mobile-overlay { background: rgba(250, 247, 240, 0.97); }
+html.day .quote-text { color: rgba(36, 28, 20, 0.82) !important; }
+html.day .translate-hint { color: rgba(36, 28, 20, 0.45); }
+html.day .avila-now { color: rgba(36, 28, 20, 0.5); }
+html.day .bg-black\/60 { background-color: rgba(252, 250, 245, 0.82) !important; }
+
+/* The cards. The page-scoped rules in personal/professional/socials are
+   !important, so matching them needs both the extra html.day specificity
+   and !important of our own - otherwise the cards stay dark. */
+html.day .card,
+html.day .page-card .card,
+html.day .home-card {
+  background: rgba(255, 253, 248, 0.88) !important;
+  border-color: rgba(74, 55, 40, 0.2) !important;
+  box-shadow: 0 6px 26px rgba(74, 55, 40, 0.1);
 }
 
 html.day .card:hover {
-  border-color: rgba(74, 55, 40, 0.32);
-  box-shadow: 0 10px 32px rgba(74, 55, 40, 0.14);
+  border-color: rgba(36, 91, 94, 0.45) !important;
+  box-shadow: 0 10px 32px rgba(74, 55, 40, 0.16);
 }
 
-html.day .card-teal { border-color: rgba(44, 106, 109, 0.32); }
-html.day .card-sage { border-color: rgba(93, 117, 85, 0.32); }
-html.day .card-caramel { border-color: rgba(160, 110, 66, 0.32); }
-html.day .card-tan { border-color: rgba(140, 118, 92, 0.32); }
+html.day .card-teal { border-color: rgba(36, 91, 94, 0.35) !important; }
+html.day .card-sage { border-color: rgba(80, 104, 72, 0.35) !important; }
+html.day .card-caramel { border-color: rgba(150, 100, 58, 0.35) !important; }
+html.day .card-tan { border-color: rgba(130, 108, 82, 0.35) !important; }
 
 html.day .nav-button {
-  background: rgba(255, 253, 248, 0.72);
+  background: rgba(255, 253, 248, 0.9);
   border-color: rgba(74, 55, 40, 0.22);
   color: #241c14;
 }
 
 html.day .nav-button:hover {
-  background: rgba(255, 255, 252, 0.92);
-  border-color: rgba(44, 106, 109, 0.5);
+  background: rgba(255, 255, 253, 0.98);
+  border-color: rgba(36, 91, 94, 0.5);
 }
 
-/* A bright page needs less black sitting on top of the landscape */
-html.day .black-overlay { opacity: 0 !important; }
-html.day .water-pool { opacity: 0.35; }
+/* Mute that busy landscape instead of revealing it. Turning the scrim off
+   entirely was the mistake - text ended up sitting on mountains. */
+html.day .black-overlay {
+  background: rgba(252, 250, 245, 0.55);
+  opacity: 1 !important;
+}
+
+html.day .landscape-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(252, 250, 245, 0.6) 0%,
+    rgba(248, 246, 238, 0.52) 50%,
+    rgba(245, 240, 230, 0.62) 100%
+  );
+}
+
+html.day .landscape-bg { filter: saturate(0.72) brightness(1.06); }
+html.day .water-pool { opacity: 0.28; }
 
 html.day ::-webkit-scrollbar-track { background: rgba(74, 55, 40, 0.08); }
 html.day ::-webkit-scrollbar-thumb { background: rgba(74, 55, 40, 0.3); }
