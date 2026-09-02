@@ -442,40 +442,17 @@ import Layout from '../layouts/Layout.astro';
     }
 
     /* Grid View */
+    /* Fluid columns: fills the container at any story count, wraps naturally.
+       min() keeps a single column from overflowing very narrow screens. */
     .stories-wrapper.grid-view .stories-grid {
       display: grid;
-      grid-template-rows: repeat(2, auto);
-      grid-auto-flow: column;
-      grid-auto-columns: 280px;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
       gap: 1rem;
-      overflow-x: auto;
-      padding-bottom: 1rem;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(140, 120, 180, 0.3) transparent;
-      /* Show peek of next card */
-      padding-right: 60px;
-      margin-right: -60px;
-    }
-
-    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar-track {
-      background: rgba(100, 80, 140, 0.1);
-      border-radius: 3px;
-    }
-
-    .stories-wrapper.grid-view .stories-grid::-webkit-scrollbar-thumb {
-      background: rgba(140, 120, 180, 0.3);
-      border-radius: 3px;
+      align-items: stretch;
     }
 
     .stories-wrapper.grid-view .story-card-new {
-      scroll-snap-align: start;
-      width: 280px;
-      height: 200px;
+      min-height: 200px;
     }
 
     /* List View */
@@ -486,25 +463,16 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .stories-wrapper.list-view .story-card-new {
-      width: 100%;
-      height: auto;
-      min-height: 120px;
-    }
-
-    .stories-wrapper.list-view .story-card-new .card-content {
       flex-direction: row;
-      gap: 1.5rem;
-    }
-
-    .stories-wrapper.list-view .story-card-new .card-text {
-      flex: 1;
+      width: 100%;
+      min-height: 120px;
     }
 
     /* New Story Card */
     .story-card-new {
-      --cover-h: 92px;
-      --cover-w: 180px;
       position: relative;
+      display: flex;
+      flex-direction: column;
       background: rgba(15, 12, 20, 0.9);
       border: 1px solid rgba(100, 80, 140, 0.25);
       border-radius: 12px;
@@ -528,12 +496,12 @@ import Layout from '../layouts/Layout.astro';
     /* Cover art sits in its own band rather than washing out behind the text.
        Band size is a variable because percentage padding resolves against
        width, not height, so the content offset has to be driven in px. */
+    /* In normal flow with a fixed ratio, so the art scales with the card
+       instead of staying a stubby band on a wider one. */
     .card-cover {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: var(--cover-h);
+      position: relative;
+      flex: none;
+      aspect-ratio: 16 / 9;
       background-size: cover;
       background-position: center 35%;
       opacity: 0.9;
@@ -547,10 +515,7 @@ import Layout from '../layouts/Layout.astro';
     /* Only the bottom of the band fades, so the text below sits on solid ground */
     .card-cover-gradient {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: var(--cover-h);
+      inset: 0;
       background: linear-gradient(
         to bottom,
         rgba(15, 12, 20, 0) 55%,
@@ -560,25 +525,10 @@ import Layout from '../layouts/Layout.astro';
       pointer-events: none;
     }
 
-    .story-card-new.has-cover .card-content {
-      padding-top: calc(var(--cover-h) + 0.75rem);
-    }
-
-    /* A 280x200 card cannot fit a cover band plus three lines of preview,
-       so covered cards read as posters: art, title, meta. */
-    .stories-wrapper.grid-view .story-card-new.has-cover .card-preview {
-      display: none;
-    }
-
-    /* List rows are wide and short, so the art works better as a left strip */
-    .stories-wrapper.list-view .card-cover,
-    .stories-wrapper.list-view .card-cover-gradient {
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: auto;
-      width: var(--cover-w);
-      height: auto;
+    /* List rows are wide and short, so the art becomes a left column */
+    .stories-wrapper.list-view .card-cover {
+      aspect-ratio: auto;
+      flex: 0 0 180px;
     }
 
     .stories-wrapper.list-view .card-cover-gradient {
@@ -589,11 +539,6 @@ import Layout from '../layouts/Layout.astro';
       );
     }
 
-    .stories-wrapper.list-view .story-card-new.has-cover .card-content {
-      padding-top: 1.25rem;
-      padding-left: calc(var(--cover-w) + 1.25rem);
-    }
-
     /* Card Content */
     .card-content {
       position: relative;
@@ -601,7 +546,7 @@ import Layout from '../layouts/Layout.astro';
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      height: 100%;
+      flex: 1;
     }
 
     .card-header {
@@ -828,25 +773,11 @@ import Layout from '../layouts/Layout.astro';
 
     /* Mobile Adjustments */
     @media (max-width: 768px) {
-      .stories-wrapper.grid-view .stories-grid {
-        grid-template-rows: auto;
-        grid-auto-columns: 260px;
-      }
-
-      .stories-wrapper.grid-view .story-card-new {
-        width: 260px;
-        height: 180px;
-      }
-
       .filter-tabs {
         overflow-x: auto;
         flex-wrap: nowrap;
         padding-bottom: 0.5rem;
         -webkit-overflow-scrolling: touch;
-      }
-
-      .stories-wrapper.list-view .story-card-new .card-content {
-        flex-direction: column;
       }
 
       .reader-body {
@@ -862,9 +793,8 @@ import Layout from '../layouts/Layout.astro';
         height: 200px;
       }
 
-      .story-card-new {
-        --cover-h: 80px;
-        --cover-w: 110px;
+      .stories-wrapper.list-view .card-cover {
+        flex: 0 0 110px;
       }
 
       .reader-title {
@@ -1258,8 +1188,9 @@ import Layout from '../layouts/Layout.astro';
       return `
         <article class="story-card-new${hasCover ? ' has-cover' : ''}" data-story-id="${story.id}" data-category="${story.category || 'Uncategorized'}">
           ${hasCover ? `
-            <div class="card-cover" style="background-image: url('${story.coverImage}')"></div>
-            <div class="card-cover-gradient"></div>
+            <div class="card-cover" style="background-image: url('${story.coverImage}')">
+              <div class="card-cover-gradient"></div>
+            </div>
           ` : ''}
           <div class="card-content">
             <div class="card-header">
