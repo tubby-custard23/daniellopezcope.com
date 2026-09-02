@@ -312,6 +312,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
 
           let asleep = false;
           let lastPawX = tubX;
+          let pawSide = 1;
           let sleepTimer: ReturnType<typeof setTimeout> | null = null;
           let tubY = GROUND() - 150;
           let facingRight = true;
@@ -399,10 +400,19 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             if (gap <= 0 || Math.abs(tubX - lastPawX) < gap) return;
             lastPawX = tubX;
 
+            // Alternate feet so the trail staggers instead of running straight
+            pawSide = -pawSide;
+
             const print = document.createElement('div');
             print.className = 'paw-print';
             print.style.left = `${tubX + (facingRight ? 300 : 330)}px`;
-            print.style.bottom = `${GROUND() + 4}px`;
+            print.style.bottom = `${GROUND() + 2 + pawSide * 5}px`;
+
+            // A little scatter, leaning the way he is walking
+            print.style.setProperty('--paw-rot', `${(facingRight ? 12 : -12) + (Math.random() * 16 - 8)}deg`);
+            print.style.setProperty('--paw-flip', facingRight ? '1' : '-1');
+            print.style.setProperty('--paw-scale', String(0.86 + Math.random() * 0.28));
+
             document.body.appendChild(print);
 
             const remove = () => print.remove();

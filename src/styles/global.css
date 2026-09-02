@@ -1340,30 +1340,45 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Paw prints - each one removes itself when this animation ends */
+/* A real paw: pad plus four toes, as an SVG mask so the element stays a
+   single div and the colour lives in CSS where the fade can reach it. */
 .paw-print {
   position: fixed;
-  width: 12px;
-  height: 12px;
-  border-radius: 52% 52% 44% 44%;
-  background: rgba(181, 131, 90, 0.72);
-  box-shadow: 0 0 5px rgba(74, 55, 40, 0.4);
+  width: 15px;
+  height: 15px;
+  background: rgba(181, 131, 90, 0.78);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cellipse cx='24' cy='37' rx='12' ry='15.5' transform='rotate%28-26 24 37%29' fill='black'/%3E%3Cellipse cx='44' cy='20' rx='12' ry='16.5' transform='rotate%28-9 44 20%29' fill='black'/%3E%3Cellipse cx='66' cy='21' rx='12' ry='16.5' transform='rotate%2811 66 21%29' fill='black'/%3E%3Cellipse cx='85' cy='39' rx='11.5' ry='15' transform='rotate%2828 85 39%29' fill='black'/%3E%3Cpath d='M54 45c17.5 0 29 11 29 23.5 0 13-12.5 21.5-29 21.5S25 81.5 25 68.5C25 56 36.5 45 54 45z' fill='black'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cellipse cx='24' cy='37' rx='12' ry='15.5' transform='rotate%28-26 24 37%29' fill='black'/%3E%3Cellipse cx='44' cy='20' rx='12' ry='16.5' transform='rotate%28-9 44 20%29' fill='black'/%3E%3Cellipse cx='66' cy='21' rx='12' ry='16.5' transform='rotate%2811 66 21%29' fill='black'/%3E%3Cellipse cx='85' cy='39' rx='11.5' ry='15' transform='rotate%2828 85 39%29' fill='black'/%3E%3Cpath d='M54 45c17.5 0 29 11 29 23.5 0 13-12.5 21.5-29 21.5S25 81.5 25 68.5C25 56 36.5 45 54 45z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
   z-index: 998;
   pointer-events: none;
-  animation: paw-fade 4.5s ease-out forwards;
+  /* set per print by the walk loop */
+  transform: rotate(var(--paw-rot, 0deg)) scaleX(var(--paw-flip, 1)) scale(var(--paw-scale, 1));
+  animation: paw-fade 5s ease-out forwards;
 }
 
+/* Opacity only. A transform in here would fight the per-print rotation. */
 @keyframes paw-fade {
-  0%   { opacity: 0; transform: scale(0.5); }
-  8%   { opacity: 0.9; transform: scale(1); }
-  55%  { opacity: 0.7; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1); }
+  0%   { opacity: 0; }
+  7%   { opacity: 0.95; }
+  60%  { opacity: 0.75; }
+  100% { opacity: 0; }
 }
 
 /* ---------------------------------------------------------- Konami mode */
+/* In front of the page, not behind it. The home page has a fog canvas at
+   z-10, a sunburst at z-30 and its content at z-40, so the old z-4 meant
+   rain and lightning were invisible there while working everywhere else.
+   Rain falling in front of the content is also just what rain does. */
 .rain-canvas {
   position: fixed;
   inset: 0;
-  z-index: 4;
+  z-index: 1020;
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.4s ease;
@@ -1372,7 +1387,7 @@ h1, h2, h3, h4, h5, h6 {
 .spooky-flash {
   position: fixed;
   inset: -10%;
-  z-index: 5;
+  z-index: 1021;
   opacity: 0;
   pointer-events: none;
 }
@@ -1403,7 +1418,7 @@ html.spooky .nav-button {
   html.spooky .spooky-flash.strike { animation: none; opacity: 0; }
   .dachshund-container.sleeping,
   .dachshund-container.sleeping::after { animation: none; }
-  .paw-print { animation: paw-fade 4.5s linear forwards; }
+  .paw-print { animation: paw-fade 5s linear forwards; }
 }
 
 
@@ -1464,7 +1479,7 @@ html.spooky body {
 .spooky-veil {
   position: fixed;
   inset: 0;
-  z-index: 6;
+  z-index: 6;   /* deliberately behind the content: mood, not a dimmer */
   pointer-events: none;
   opacity: 0;
   background: rgba(10, 12, 20, 0.45);
