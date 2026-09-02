@@ -1358,34 +1358,25 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ---------------------------------------------------------- Konami mode */
-.spooky-rain,
-.spooky-flash {
+.rain-canvas {
   position: fixed;
-  inset: -10%;
+  inset: 0;
   z-index: 4;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1.2s ease;
+  transition: opacity 1.4s ease;
 }
 
-.spooky-rain {
-  background-image:
-    repeating-linear-gradient(101deg, rgba(190, 210, 235, 0) 0 7px, rgba(190, 210, 235, 0.3) 7px 8px, rgba(190, 210, 235, 0) 8px 16px),
-    repeating-linear-gradient(96deg, rgba(190, 210, 235, 0) 0 13px, rgba(190, 210, 235, 0.18) 13px 14px, rgba(190, 210, 235, 0) 14px 30px);
-  background-size: 100% 55%, 100% 70%;
+.spooky-flash {
+  position: fixed;
+  inset: -10%;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
 }
-
-html.spooky .spooky-rain {
-  opacity: 1;
-  animation: spooky-rain-a 0.5s linear infinite, spooky-rain-b 0.85s linear infinite;
-}
-
-@keyframes spooky-rain-a { to { background-position-y: 55%, 0; } }
-@keyframes spooky-rain-b { to { background-position-y: 0, 70%; } }
 
 .spooky-flash {
   background: radial-gradient(ellipse 80% 60% at 50% 25%, rgba(190, 180, 255, 0.55) 0%, transparent 70%);
-  transition: none;
 }
 
 html.spooky .spooky-flash.strike {
@@ -1412,11 +1403,155 @@ html.spooky .nav-button {
 
 /* Respect a stated preference for less motion in the added layers */
 @media (prefers-reduced-motion: reduce) {
-  html.spooky .spooky-rain { animation: none; }
   html.spooky .spooky-flash.strike { animation: none; opacity: 0; }
   .dachshund-container.sleeping,
   .dachshund-container.sleeping::after { animation: none; }
   .paw-print { animation: paw-fade 3s linear forwards; }
+}
+
+
+/* ===================================================== local sky theming
+   Three gradient stops are set on the root element by scripts/sky.ts from
+   the visitor's real conditions. Everything below just consumes them, so
+   the palette can shift without touching any markup. */
+
+html {
+  --sky-top: var(--color-deep-black);
+  --sky-mid: var(--color-deep-black);
+  --sky-bot: var(--color-deep-black);
+}
+
+html.day,
+html.night {
+  background: var(--sky-mid);
+}
+
+html.day body,
+html.night body {
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bot) 100%);
+  background-attachment: fixed;
+}
+
+/* The site is written in white-on-dark utilities, so daylight inverts the
+   ink rather than restyling every component. */
+html.day body { color: #241c14; }
+
+html.day .text-white { color: #241c14 !important; }
+html.day .text-white\/90 { color: rgba(36, 28, 20, 0.9) !important; }
+html.day .text-white\/80 { color: rgba(36, 28, 20, 0.84) !important; }
+html.day .text-white\/70 { color: rgba(36, 28, 20, 0.76) !important; }
+html.day .text-white\/60 { color: rgba(36, 28, 20, 0.68) !important; }
+html.day .text-white\/50 { color: rgba(36, 28, 20, 0.6) !important; }
+html.day .text-white\/40 { color: rgba(36, 28, 20, 0.52) !important; }
+html.day .text-white\/30 { color: rgba(36, 28, 20, 0.44) !important; }
+html.day .text-dusty-teal { color: #2c6a6d !important; }
+
+html.day .border-white\/10 { border-color: rgba(36, 28, 20, 0.14) !important; }
+html.day .border-white\/30 { border-color: rgba(36, 28, 20, 0.25) !important; }
+html.day .bg-black\/60 { background-color: rgba(252, 250, 245, 0.78) !important; }
+
+html.day .card {
+  background: rgba(255, 253, 248, 0.74);
+  border-color: rgba(74, 55, 40, 0.18);
+  box-shadow: 0 6px 26px rgba(74, 55, 40, 0.09);
+}
+
+html.day .card:hover {
+  border-color: rgba(74, 55, 40, 0.32);
+  box-shadow: 0 10px 32px rgba(74, 55, 40, 0.14);
+}
+
+html.day .card-teal { border-color: rgba(44, 106, 109, 0.32); }
+html.day .card-sage { border-color: rgba(93, 117, 85, 0.32); }
+html.day .card-caramel { border-color: rgba(160, 110, 66, 0.32); }
+html.day .card-tan { border-color: rgba(140, 118, 92, 0.32); }
+
+html.day .nav-button {
+  background: rgba(255, 253, 248, 0.72);
+  border-color: rgba(74, 55, 40, 0.22);
+  color: #241c14;
+}
+
+html.day .nav-button:hover {
+  background: rgba(255, 255, 252, 0.92);
+  border-color: rgba(44, 106, 109, 0.5);
+}
+
+/* A bright page needs less black sitting on top of the landscape */
+html.day .black-overlay { opacity: 0 !important; }
+html.day .water-pool { opacity: 0.35; }
+
+html.day ::-webkit-scrollbar-track { background: rgba(74, 55, 40, 0.08); }
+html.day ::-webkit-scrollbar-thumb { background: rgba(74, 55, 40, 0.3); }
+
+/* Konami mode is a storm - it forces night regardless of the clock */
+html.spooky.day body { color: rgba(255, 255, 255, 0.92); }
+html.spooky body {
+  background: linear-gradient(180deg, #10131c 0%, #0b0b0f 55%, #08080a 100%);
+  filter: saturate(0.55) brightness(0.82) contrast(1.08);
+}
+
+/* Storm toggle. Sits above the bone but below the mobile menu, and is a
+   real <button> so the bone's landing check already treats it as something
+   to roll away from. */
+.storm-toggle {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 1050;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(20, 18, 28, 0.55);
+  border: 1px solid rgba(140, 120, 180, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  filter: grayscale(1);
+  opacity: 0.45;
+  transition: opacity 0.25s ease, filter 0.25s ease, transform 0.2s ease,
+              background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.storm-toggle:hover {
+  opacity: 0.95;
+  filter: grayscale(0.2);
+  transform: scale(1.1);
+}
+
+.storm-toggle.active {
+  opacity: 1;
+  filter: none;
+  background: rgba(90, 74, 140, 0.7);
+  border-color: rgba(190, 175, 245, 0.6);
+  box-shadow: 0 0 16px rgba(170, 150, 240, 0.5);
+}
+
+html.day .storm-toggle {
+  background: rgba(255, 253, 248, 0.7);
+  border-color: rgba(74, 55, 40, 0.25);
+  color: rgba(36, 28, 20, 0.6);
+}
+
+/* Feedback for a poke, so the five-poke easter egg is discoverable */
+.dachshund-container.poked {
+  animation: tub-poked 0.36s ease-out;
+}
+
+@keyframes tub-poked {
+  0%   { transform: translateY(0) scale(1, 1); }
+  30%  { transform: translateY(2px) scale(1.05, 0.93) rotate(-2deg); }
+  65%  { transform: translateY(-5px) scale(0.97, 1.05) rotate(2deg); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dachshund-container.poked { animation: none; }
+  .storm-toggle { transition: none; }
 }
 
 /* Scrollbar */

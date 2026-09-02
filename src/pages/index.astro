@@ -9,9 +9,6 @@ import Layout from '../layouts/Layout.astro';
   <!-- Color tint overlay -->
   <div id="color-overlay" class="color-overlay"></div>
 
-  <!-- Rain, only if it is actually raining on the Ávila right now -->
-  <div id="rain-layer" class="rain-layer"></div>
-
   <!-- Black overlay -->
   <div id="black-overlay" class="black-overlay"></div>
 
@@ -97,28 +94,6 @@ import Layout from '../layouts/Layout.astro';
       </blockquote>
 
       <style>
-    /* Real rain. Two layers at different speeds read as depth. */
-    .rain-layer {
-      position: fixed;
-      inset: -10% -10% -10% -10%;
-      z-index: 3;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 2s ease;
-      background-image:
-        repeating-linear-gradient(102deg, rgba(190, 210, 235, 0) 0 6px, rgba(190, 210, 235, 0.34) 6px 7px, rgba(190, 210, 235, 0) 7px 14px),
-        repeating-linear-gradient(97deg, rgba(190, 210, 235, 0) 0 11px, rgba(190, 210, 235, 0.2) 11px 12px, rgba(190, 210, 235, 0) 12px 26px);
-      background-size: 100% 55%, 100% 70%;
-      animation: rain-fall-a 0.55s linear infinite, rain-fall-b 0.9s linear infinite;
-    }
-
-    @keyframes rain-fall-a { to { background-position-y: 55%, 0; } }
-    @keyframes rain-fall-b { to { background-position-y: 0, 70%; } }
-
-    @media (prefers-reduced-motion: reduce) {
-      .rain-layer { animation: none; }
-    }
-
     .avila-now {
       font-size: 0.72rem;
       letter-spacing: 0.06em;
@@ -132,88 +107,19 @@ import Layout from '../layouts/Layout.astro';
   </style>
 
   <script>
-    import { defineTweaks, tweak, onTweakChange } from '../scripts/tweaks';
+    import { onSky } from '../scripts/sky';
 
-    defineTweaks([
-      { group: 'weather', key: 'weather.tint', label: 'sky tint',       min: 0, max: 2,   step: 0.05, value: 1 },
-      { group: 'weather', key: 'weather.rain', label: 'rain intensity', min: 0, max: 1.5, step: 0.05, value: 1 },
-    ]);
-
-    /* ------------------------------------------------- live Ávila weather
-     *
-     * The page already had a tint layer, a fog canvas and a water pool. Rather
-     * than add new scenery, real conditions drive what is already there.
-     *
-     * Everything here is best-effort: if the fetch fails the page keeps its
-     * designed look, because a weather outage must never break the reveal.
-     */
-    type Sky = { temp: number; label: string; cloudCover: number; precipitation: number; localTime: string; place: string };
-    let sky: Sky | null = null;
-
-    // Two colours per phase of the Caracas day, blended toward grey by cloud
-    function skyStops(hour: number): [number[], number[]] {
-      if (hour >= 5 && hour < 7)  return [[255, 170, 150], [120, 110, 160]]; // dawn
-      if (hour >= 7 && hour < 16) return [[255, 235, 180], [150, 180, 190]]; // day
-      if (hour >= 16 && hour < 19) return [[255, 140, 0],  [181, 131, 90]];  // dusk
-      return [[36, 46, 96], [10, 12, 30]];                                    // night
-    }
-
-    function mix(a: number[], b: number[], t: number) {
-      return a.map((v, i) => Math.round(v + (b[i] - v) * t));
-    }
-
-    function applySky() {
-      if (!sky) return;
-
-      const hour = Number((sky.localTime.split('T')[1] || '12:00').split(':')[0]);
-      const cloud = Math.min(1, sky.cloudCover / 100);
-      const wet = sky.precipitation > 0;
-      const strength = tweak('weather.tint');
-
-      const [warm, cool] = skyStops(hour);
-      const grey = [122, 124, 130];
-
-      // Heavy cloud pulls both stops toward grey and lifts overall opacity
-      const from = mix(warm, grey, cloud * 0.65);
-      const to = mix(cool, grey, cloud * 0.5);
-      const alphaA = (0.14 + cloud * 0.12 + (wet ? 0.06 : 0)) * strength;
-      const alphaB = (0.2 + cloud * 0.15 + (wet ? 0.08 : 0)) * strength;
-
-      const overlay = document.getElementById('color-overlay');
-      if (overlay) {
-        overlay.style.background =
-          `linear-gradient(135deg, rgba(${from.join(',')}, ${alphaA.toFixed(3)}) 0%, ` +
-          `rgba(${to.join(',')}, ${alphaB.toFixed(3)}) 100%)`;
-      }
-
-      const rain = document.getElementById('rain-layer');
-      if (rain) {
-        // open-meteo reports mm in the last hour; 2mm is already a downpour
-        const wetness = Math.min(1, sky.precipitation / 2);
-        rain.style.opacity = String(wetness * 0.75 * tweak('weather.rain'));
-      }
-
+    /* The theme and the rain are handled globally in scripts/sky.ts, which
+       fetches once for the whole site. This page only adds the readout, so
+       the visual shift is legible rather than mysterious. */
+    onSky((sky) => {
       const readout = document.getElementById('avila-now');
-      if (readout) {
-        const time = (sky.localTime.split('T')[1] || '').slice(0, 5);
-        readout.textContent = `${sky.place} right now · ${sky.temp}° · ${sky.label} · ${time}`;
-        readout.hidden = false;
-      }
-    }
+      if (!readout) return;
 
-    async function loadSky() {
-      try {
-        const response = await fetch('/api/weather');
-        if (!response.ok) return;
-        sky = await response.json();
-        applySky();
-      } catch {
-        /* keep the designed look */
-      }
-    }
-
-    onTweakChange(applySky);
-    loadSky();
+      const time = (sky.localTime.split('T')[1] || '').slice(0, 5);
+      readout.textContent = `${sky.place} right now · ${sky.temp}° · ${sky.label} · ${time}`;
+      readout.hidden = false;
+    });
 
         const wrapper = document.querySelector('.quote-wrapper');
         const line = document.getElementById('translate-line');

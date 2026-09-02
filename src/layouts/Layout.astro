@@ -3,13 +3,14 @@ import '../styles/global.css'
 
 interface Props {
   title: string;
+  alwaysNight?: boolean;
   showNav?: boolean;
   showLandscape?: boolean;
   showTub?: boolean;
   scrollable?: boolean;
 }
 
-const { title, showNav = false, showLandscape = false, showTub = true, scrollable = false } = Astro.props;
+const { title, showNav = false, showLandscape = false, showTub = true, scrollable = false, alwaysNight = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,7 +26,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <title>{title}</title>
   </head>
-  <body class="min-h-screen">
+  <body class:list={["min-h-screen", { "always-night": alwaysNight }]}>
     <!-- Landscape Background for inner pages -->
     {showLandscape && (
       <>
@@ -75,9 +76,12 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
       </div>
     )}
 
-    <!-- Konami mode: inert until the code is entered -->
-    <div id="spooky-rain" class="spooky-rain" aria-hidden="true"></div>
+    <!-- Rain, shared by real weather and Konami mode -->
+    <canvas id="rain-canvas" class="rain-canvas" aria-hidden="true"></canvas>
     <div id="spooky-flash" class="spooky-flash" aria-hidden="true"></div>
+
+    <!-- Storm toggle -->
+    <button id="storm-toggle" class="storm-toggle" type="button" aria-pressed="false" aria-label="Toggle storm">⚡</button>
 
     <!-- Main Content -->
     <main class={showNav ? "pt-20 relative z-10" : "relative z-10"}>
@@ -105,6 +109,8 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
 
     <script>
       import { defineTweaks, tweak, onTweakChange, mountTweakPanel } from '../scripts/tweaks';
+      import { mountRain, setRain } from '../scripts/rain';
+      import { startSky } from '../scripts/sky';
 
       // Knobs this page owns. Defaults mirror the committed constants, so a
       // fresh visitor sees exactly what the source says.
@@ -118,6 +124,12 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
       ]);
 
       mountTweakPanel();
+
+      const rainCanvas = document.getElementById('rain-canvas') as HTMLCanvasElement | null;
+      if (rainCanvas) mountRain(rainCanvas);
+
+      // Bright by day, dark by night, shaded by the visitor's own weather
+      startSky();
 
       // Nav mobile menu toggle
       document.addEventListener('DOMContentLoaded', () => {
@@ -167,8 +179,17 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
         spookyTimer = setTimeout(spookyFlash, 1800 + Math.random() * 5000);
       }
 
+      function isSpooky(): boolean {
+        return document.documentElement.classList.contains('spooky');
+      }
+
       function setSpooky(on: boolean) {
         document.documentElement.classList.toggle('spooky', on);
+        setRain('konami', on ? 0.85 : 0);
+
+        const toggle = document.getElementById('storm-toggle');
+        toggle?.classList.toggle('active', on);
+        toggle?.setAttribute('aria-pressed', String(on));
         try {
           if (on) sessionStorage.setItem('spooky', '1');
           else sessionStorage.removeItem('spooky');
@@ -196,7 +217,52 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
 
         if (konamiAt === KONAMI.length) {
           konamiAt = 0;
-          setSpooky(!document.documentElement.classList.contains('spooky'));
+          setSpooky(!isSpooky());
+        }
+      });
+
+      document.getElementById('storm-toggle')?.addEventListener('click', () => {
+        setSpooky(!isSpooky());
+      });
+
+      /* Poke Tub five times and the storm rolls in.
+       *
+       * His container is deliberately pointer-events: none so it can never
+       * block a button, so this cannot be a click handler on the element.
+       * Instead every document click is tested against his body box - clicks
+       * still reach whatever is underneath, nothing is ever intercepted.
+       */
+      let pokes = 0;
+      let pokeReset: ReturnType<typeof setTimeout> | null = null;
+
+      document.addEventListener('click', (e) => {
+        const dog = document.getElementById('dachshund');
+        if (!dog || !dog.classList.contains('visible')) return;
+
+        const box = dog.getBoundingClientRect();
+        // his body, not the whole 640x360 container
+        const inside =
+          e.clientX >= box.left + box.width * 0.34 &&
+          e.clientX <= box.left + box.width * 0.80 &&
+          e.clientY >= box.top + box.height * 0.42 &&
+          e.clientY <= box.bottom;
+
+        if (!inside) {
+          pokes = 0;
+          return;
+        }
+
+        pokes++;
+        dog.classList.remove('poked');
+        void dog.offsetWidth;
+        dog.classList.add('poked');
+
+        if (pokeReset) clearTimeout(pokeReset);
+        pokeReset = setTimeout(() => { pokes = 0; }, 2500);
+
+        if (pokes >= 5) {
+          pokes = 0;
+          setSpooky(!isSpooky());
         }
       });
 
