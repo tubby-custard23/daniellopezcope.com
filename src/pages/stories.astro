@@ -53,6 +53,11 @@ import Layout from '../layouts/Layout.astro';
                 <option value="calm">Eerie Calm</option>
                 <option value="dark">Dark & Mysterious</option>
                 <option value="tension">Tension</option>
+                <option value="liminal">Liminal</option>
+                <option value="void">The Void</option>
+                <option value="haunted">Haunted</option>
+                <option value="dread">Creeping Dread</option>
+                <option value="nightmare">Nightmare</option>
               </select>
             </div>
           </div>
@@ -61,15 +66,20 @@ import Layout from '../layouts/Layout.astro';
     </header>
 
     <!-- Ambient Audio Mixer -->
-    <audio id="audio-night" loop preload="auto" src="/audio/freesound_community-night-ambience-17064.mp3"></audio>
-    <audio id="audio-storm1" loop preload="auto" src="/audio/eco-art-sounds-of-a-storm-with-wind-and-thunder-375923.mp3"></audio>
-    <audio id="audio-storm2" loop preload="auto" src="/audio/universfield-thunderstorm-ambiance-191991.mp3"></audio>
-    <audio id="audio-piano1" loop preload="auto" src="/audio/farran_ez-minimal-piano-underscore-456148.mp3"></audio>
-    <audio id="audio-piano2" loop preload="auto" src="/audio/universfield-creepy-piano-for-scary-stories-158423.mp3"></audio>
-    <audio id="audio-piano3" loop preload="auto" src="/audio/theojt-suspense-piano-theme-131357.mp3"></audio>
-    <audio id="audio-piano4" loop preload="auto" src="/audio/universfield-dark-crime-piano-drama-449252.mp3"></audio>
-    <audio id="audio-piano5" loop preload="auto" src="/audio/universfield-enigmatic-piano-atmosphere-144734.mp3"></audio>
-    <audio id="audio-strings" loop preload="auto" src="/audio/freesound_community-suspense_strings_001wav-14805.mp3"></audio>
+    <audio id="audio-night" loop preload="none" src="/audio/freesound_community-night-ambience-17064.mp3"></audio>
+    <audio id="audio-storm1" loop preload="none" src="/audio/eco-art-sounds-of-a-storm-with-wind-and-thunder-375923.mp3"></audio>
+    <audio id="audio-storm2" loop preload="none" src="/audio/universfield-thunderstorm-ambiance-191991.mp3"></audio>
+    <audio id="audio-piano1" loop preload="none" src="/audio/farran_ez-minimal-piano-underscore-456148.mp3"></audio>
+    <audio id="audio-piano2" loop preload="none" src="/audio/universfield-creepy-piano-for-scary-stories-158423.mp3"></audio>
+    <audio id="audio-piano3" loop preload="none" src="/audio/theojt-suspense-piano-theme-131357.mp3"></audio>
+    <audio id="audio-piano4" loop preload="none" src="/audio/universfield-dark-crime-piano-drama-449252.mp3"></audio>
+    <audio id="audio-piano5" loop preload="none" src="/audio/universfield-enigmatic-piano-atmosphere-144734.mp3"></audio>
+    <audio id="audio-strings" loop preload="none" src="/audio/freesound_community-suspense_strings_001wav-14805.mp3"></audio>
+    <audio id="audio-horror" loop preload="none" src="/audio/atlasaudio-horror-ambience-512255.mp3"></audio>
+    <audio id="audio-voices" loop preload="none" src="/audio/aryxmyth-liminal-voices-553850.mp3"></audio>
+    <audio id="audio-backrooms" loop preload="none" src="/audio/tim_kulig_free_music-backrooms-156118.mp3"></audio>
+    <audio id="audio-liminal" loop preload="none" src="/audio/tim_kulig_free_music-backrooms-feeling-1-156115.mp3"></audio>
+    <audio id="audio-dread" loop preload="none" src="/audio/logicallism-not-welcome-551350.mp3"></audio>
 
     <main class="px-6 py-8">
       <div class="max-w-4xl mx-auto">
@@ -133,8 +143,9 @@ import Layout from '../layouts/Layout.astro';
               </button>
             </div>
             <div class="reader-content">
-              <div class="reader-cover" id="reader-cover"></div>
-              <div class="reader-cover-gradient"></div>
+              <div class="reader-cover" id="reader-cover">
+                <div class="reader-cover-gradient"></div>
+              </div>
               <div class="reader-body">
                 <h2 class="reader-title" id="reader-title"></h2>
                 <div class="reader-meta" id="reader-meta"></div>
@@ -491,6 +502,8 @@ import Layout from '../layouts/Layout.astro';
 
     /* New Story Card */
     .story-card-new {
+      --cover-h: 92px;
+      --cover-w: 180px;
       position: relative;
       background: rgba(15, 12, 20, 0.9);
       border: 1px solid rgba(100, 80, 140, 0.25);
@@ -512,34 +525,73 @@ import Layout from '../layouts/Layout.astro';
     }
 
     /* Card Background Cover */
+    /* Cover art sits in its own band rather than washing out behind the text.
+       Band size is a variable because percentage padding resolves against
+       width, not height, so the content offset has to be driven in px. */
     .card-cover {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      bottom: 0;
+      height: var(--cover-h);
       background-size: cover;
-      background-position: center;
-      opacity: 0.3;
+      background-position: center 35%;
+      opacity: 0.9;
       transition: opacity 0.3s ease;
     }
 
     .story-card-new:hover .card-cover {
-      opacity: 0.4;
+      opacity: 1;
     }
 
+    /* Only the bottom of the band fades, so the text below sits on solid ground */
     .card-cover-gradient {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      bottom: 0;
+      height: var(--cover-h);
       background: linear-gradient(
         to bottom,
-        rgba(15, 12, 20, 0.3) 0%,
-        rgba(15, 12, 20, 0.7) 50%,
-        rgba(15, 12, 20, 0.95) 100%
+        rgba(15, 12, 20, 0) 55%,
+        rgba(15, 12, 20, 0.85) 88%,
+        rgba(15, 12, 20, 1) 100%
       );
+      pointer-events: none;
+    }
+
+    .story-card-new.has-cover .card-content {
+      padding-top: calc(var(--cover-h) + 0.75rem);
+    }
+
+    /* A 280x200 card cannot fit a cover band plus three lines of preview,
+       so covered cards read as posters: art, title, meta. */
+    .stories-wrapper.grid-view .story-card-new.has-cover .card-preview {
+      display: none;
+    }
+
+    /* List rows are wide and short, so the art works better as a left strip */
+    .stories-wrapper.list-view .card-cover,
+    .stories-wrapper.list-view .card-cover-gradient {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: auto;
+      width: var(--cover-w);
+      height: auto;
+    }
+
+    .stories-wrapper.list-view .card-cover-gradient {
+      background: linear-gradient(
+        to right,
+        rgba(15, 12, 20, 0) 55%,
+        rgba(15, 12, 20, 0.9) 100%
+      );
+    }
+
+    .stories-wrapper.list-view .story-card-new.has-cover .card-content {
+      padding-top: 1.25rem;
+      padding-left: calc(var(--cover-w) + 1.25rem);
     }
 
     /* Card Content */
@@ -688,29 +740,25 @@ import Layout from '../layouts/Layout.astro';
       min-height: 400px;
     }
 
+    /* Hero: in normal flow so hiding it collapses the space instead of
+       leaving a gap on stories that have no cover yet. */
     .reader-cover {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 200px;
+      position: relative;
+      height: 300px;
       background-size: cover;
-      background-position: center;
-      opacity: 0.4;
+      background-position: center 35%;
     }
 
     .reader-cover-gradient {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 250px;
+      inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(12, 10, 18, 0.2) 0%,
-        rgba(12, 10, 18, 0.6) 40%,
+        rgba(12, 10, 18, 0) 55%,
+        rgba(12, 10, 18, 0.75) 82%,
         rgba(12, 10, 18, 1) 100%
       );
+      pointer-events: none;
     }
 
     .reader-body {
@@ -718,6 +766,11 @@ import Layout from '../layouts/Layout.astro';
       z-index: 1;
       padding: 2.5rem;
       padding-top: 3.5rem;
+    }
+
+    /* With a hero above, the close button no longer crowds the title */
+    .story-reader.has-cover .reader-body {
+      padding-top: 2rem;
     }
 
     .reader-title {
@@ -799,6 +852,19 @@ import Layout from '../layouts/Layout.astro';
       .reader-body {
         padding: 1.5rem;
         padding-top: 3rem;
+      }
+
+      .story-reader.has-cover .reader-body {
+        padding-top: 1.5rem;
+      }
+
+      .reader-cover {
+        height: 200px;
+      }
+
+      .story-card-new {
+        --cover-h: 80px;
+        --cover-w: 110px;
       }
 
       .reader-title {
@@ -1190,11 +1256,11 @@ import Layout from '../layouts/Layout.astro';
       const hasCover = !!story.coverImage;
 
       return `
-        <article class="story-card-new" data-story-id="${story.id}" data-category="${story.category || 'Uncategorized'}">
+        <article class="story-card-new${hasCover ? ' has-cover' : ''}" data-story-id="${story.id}" data-category="${story.category || 'Uncategorized'}">
           ${hasCover ? `
             <div class="card-cover" style="background-image: url('${story.coverImage}')"></div>
+            <div class="card-cover-gradient"></div>
           ` : ''}
-          <div class="card-cover-gradient"></div>
           <div class="card-content">
             <div class="card-header">
               <h3 class="card-title">${story.title}</h3>
@@ -1229,6 +1295,7 @@ import Layout from '../layouts/Layout.astro';
       if (!reader || !readerTitle || !readerMeta || !readerText) return;
 
       // Set cover image if available
+      reader.classList.toggle('has-cover', !!story.coverImage);
       if (readerCover) {
         if (story.coverImage) {
           readerCover.style.backgroundImage = `url('${story.coverImage}')`;
@@ -1441,20 +1508,17 @@ import Layout from '../layouts/Layout.astro';
       piano4: document.getElementById('audio-piano4') as HTMLAudioElement,
       piano5: document.getElementById('audio-piano5') as HTMLAudioElement,
       strings: document.getElementById('audio-strings') as HTMLAudioElement,
+      horror: document.getElementById('audio-horror') as HTMLAudioElement,
+      voices: document.getElementById('audio-voices') as HTMLAudioElement,
+      backrooms: document.getElementById('audio-backrooms') as HTMLAudioElement,
+      liminal: document.getElementById('audio-liminal') as HTMLAudioElement,
+      dread: document.getElementById('audio-dread') as HTMLAudioElement,
     };
 
     // Target volumes for each track (will fade to these)
-    const targetVolumes: Record<string, number> = {
-      night: 0,
-      storm1: 0,
-      storm2: 0,
-      piano1: 0,
-      piano2: 0,
-      piano3: 0,
-      piano4: 0,
-      piano5: 0,
-      strings: 0,
-    };
+    const targetVolumes: Record<string, number> = Object.fromEntries(
+      Object.keys(tracks).map(key => [key, 0])
+    );
 
     // Current volumes
     const currentVolumes: Record<string, number> = { ...targetVolumes };
@@ -1488,108 +1552,59 @@ import Layout from '../layouts/Layout.astro';
       });
     }
 
-    // Reset all piano volumes
-    function clearPianos() {
-      targetVolumes.piano1 = 0;
-      targetVolumes.piano2 = 0;
-      targetVolumes.piano3 = 0;
-      targetVolumes.piano4 = 0;
-      targetVolumes.piano5 = 0;
-    }
+    /* Every mood is a complete declaration of the mix. Levels not listed are
+       silent, so adding a track cannot leak volume from a previous mood - the
+       old switch had to zero each one by hand in nine places. */
+    const MOODS: Record<string, Record<string, number>> = {
+      quiet:     { night: 0.4,  piano1: 0.2 },
+      enigmatic: { night: 0.35, storm2: 0.1,  piano5: 0.25 },
+      suspense:  { night: 0.3,  storm2: 0.25, piano3: 0.2 },
+      storm:     { night: 0.2,  storm1: 0.35, storm2: 0.2,  piano2: 0.15 },
+      fullstorm: { night: 0.15, storm1: 0.4,  storm2: 0.3,  piano4: 0.2 },
+      creepy:    { night: 0.15, storm1: 0.3,  storm2: 0.25, piano2: 0.18, piano5: 0.1 },
+      calm:      { night: 0.3,  piano1: 0.25, piano3: 0.15 },
+      dark:      { night: 0.25, storm2: 0.15, piano4: 0.25, piano5: 0.15 },
+      tension:   { night: 0.2,  storm1: 0.15, storm2: 0.1,  piano3: 0.1,  strings: 0.2 },
+
+      // Built on the new long-form beds
+      liminal:   { backrooms: 0.4,  liminal: 0.25, night: 0.12 },
+      void:      { backrooms: 0.45, liminal: 0.3 },
+      haunted:   { horror: 0.35, voices: 0.22, night: 0.15, piano5: 0.12 },
+      dread:     { dread: 0.4,  horror: 0.2,  night: 0.12 },
+      nightmare: { dread: 0.3,  horror: 0.25, storm1: 0.2, strings: 0.15, piano4: 0.12 },
+    };
+
+    // Relative likelihood in Auto mode
+    const MOOD_WEIGHTS: Record<string, number> = {
+      quiet: 14, enigmatic: 9, suspense: 9, storm: 9, fullstorm: 8,
+      creepy: 8, calm: 8, dark: 6, tension: 5,
+      liminal: 8, void: 5, haunted: 7, dread: 6, nightmare: 4,
+    };
 
     // Set a specific mood by name
     function setMoodByName(name: string) {
-      clearPianos();
-      targetVolumes.strings = 0;
-
-      switch(name) {
-        case 'quiet':
-          targetVolumes.night = 0.4;
-          targetVolumes.storm1 = 0;
-          targetVolumes.storm2 = 0;
-          targetVolumes.piano1 = 0.2;
-          break;
-        case 'enigmatic':
-          targetVolumes.night = 0.35;
-          targetVolumes.storm1 = 0;
-          targetVolumes.storm2 = 0.1;
-          targetVolumes.piano5 = 0.25;
-          break;
-        case 'suspense':
-          targetVolumes.night = 0.3;
-          targetVolumes.storm1 = 0;
-          targetVolumes.storm2 = 0.25;
-          targetVolumes.piano3 = 0.2;
-          break;
-        case 'storm':
-          targetVolumes.night = 0.2;
-          targetVolumes.storm1 = 0.35;
-          targetVolumes.storm2 = 0.2;
-          targetVolumes.piano2 = 0.15;
-          break;
-        case 'fullstorm':
-          targetVolumes.night = 0.15;
-          targetVolumes.storm1 = 0.4;
-          targetVolumes.storm2 = 0.3;
-          targetVolumes.piano4 = 0.2;
-          break;
-        case 'creepy':
-          targetVolumes.night = 0.15;
-          targetVolumes.storm1 = 0.3;
-          targetVolumes.storm2 = 0.25;
-          targetVolumes.piano2 = 0.18;
-          targetVolumes.piano5 = 0.1;
-          break;
-        case 'calm':
-          targetVolumes.night = 0.3;
-          targetVolumes.storm1 = 0;
-          targetVolumes.storm2 = 0;
-          targetVolumes.piano1 = 0.25;
-          targetVolumes.piano3 = 0.15;
-          break;
-        case 'dark':
-          targetVolumes.night = 0.25;
-          targetVolumes.storm1 = 0;
-          targetVolumes.storm2 = 0.15;
-          targetVolumes.piano4 = 0.25;
-          targetVolumes.piano5 = 0.15;
-          break;
-        case 'tension':
-          targetVolumes.night = 0.2;
-          targetVolumes.storm1 = 0.15;
-          targetVolumes.storm2 = 0.1;
-          targetVolumes.piano3 = 0.1;
-          targetVolumes.strings = 0.2;
-          break;
-      }
+      const mood = MOODS[name] || {};
+      Object.keys(targetVolumes).forEach(key => {
+        targetVolumes[key] = mood[key] || 0;
+      });
     }
 
-    // Pick a random mood and set target volumes
+    // Pick a weighted-random mood
     function setMood() {
       if (!autoMood) return;
 
-      const mood = Math.random();
-      clearPianos();
+      const names = Object.keys(MOOD_WEIGHTS);
+      const total = names.reduce((sum, n) => sum + MOOD_WEIGHTS[n], 0);
+      let roll = Math.random() * total;
 
-      if (mood < 0.2) {
-        setMoodByName('quiet');
-      } else if (mood < 0.32) {
-        setMoodByName('enigmatic');
-      } else if (mood < 0.44) {
-        setMoodByName('suspense');
-      } else if (mood < 0.56) {
-        setMoodByName('storm');
-      } else if (mood < 0.68) {
-        setMoodByName('fullstorm');
-      } else if (mood < 0.78) {
-        setMoodByName('creepy');
-      } else if (mood < 0.88) {
-        setMoodByName('calm');
-      } else if (mood < 0.94) {
-        setMoodByName('dark');
-      } else {
-        setMoodByName('tension');
+      for (const name of names) {
+        roll -= MOOD_WEIGHTS[name];
+        if (roll <= 0) {
+          setMoodByName(name);
+          return;
+        }
       }
+      setMoodByName('quiet');
     }
 
     function startMixer() {
