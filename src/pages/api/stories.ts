@@ -3,35 +3,50 @@ import { Client } from '@notionhq/client';
 
 export const prerender = false;
 
-// Convert Notion rich_text to HTML, preserving links and basic formatting
+// Convert Notion rich_text to paragraph HTML, preserving links and formatting.
+//
+// Each run is split on newlines and every segment is wrapped in its own
+// annotation tags before the paragraphs are assembled. Splitting the joined
+// HTML instead would let a paragraph break fall inside a <strong> or an <a>
+// that spans a newline, producing unbalanced tags.
 function richTextToHtml(richText: any[]): string {
   if (!richText || !Array.isArray(richText)) return '';
 
-  return richText.map((block: any) => {
-    let text = block.plain_text || '';
+  const BREAK = '\u0000';
 
-    // Escape HTML entities
-    text = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+  const inline = richText.map((block: any) => {
+    const annotations = block.annotations;
+    const href = block.href;
 
-    // Apply annotations
-    if (block.annotations) {
-      if (block.annotations.bold) text = `<strong>${text}</strong>`;
-      if (block.annotations.italic) text = `<em>${text}</em>`;
-      if (block.annotations.underline) text = `<u>${text}</u>`;
-      if (block.annotations.strikethrough) text = `<s>${text}</s>`;
-      if (block.annotations.code) text = `<code>${text}</code>`;
-    }
+    return String(block.plain_text || '').split('\n').map((segment: string) => {
+      let text = segment
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 
-    // Wrap in link if present
-    if (block.href) {
-      text = `<a href="${block.href}" target="_blank" rel="noopener noreferrer" class="text-dusty-teal hover:text-white transition-colors">${text}</a>`;
-    }
+      if (annotations) {
+        if (annotations.bold) text = `<strong>${text}</strong>`;
+        if (annotations.italic) text = `<em>${text}</em>`;
+        if (annotations.underline) text = `<u>${text}</u>`;
+        if (annotations.strikethrough) text = `<s>${text}</s>`;
+        if (annotations.code) text = `<code>${text}</code>`;
+      }
 
-    return text;
+      if (href) {
+        text = `<a href="${href.replace(/"/g, '&quot;')}" target="_blank" rel="noopener noreferrer" class="text-dusty-teal hover:text-white transition-colors">${text}</a>`;
+      }
+
+      return text;
+    }).join(BREAK);
   }).join('');
+
+  return inline
+    .split(BREAK)
+    .map(part => part.trim())
+    // a segment of pure markup with no text is a blank line, not a paragraph
+    .filter(part => part.replace(/<[^>]*>/g, '').trim().length > 0)
+    .map(part => `<p>${part}</p>`)
+    .join('');
 }
 
 export const GET: APIRoute = async () => {
@@ -84,6 +99,7 @@ export const GET: APIRoute = async () => {
         content: richTextToHtml(properties.Content?.rich_text),
         date: properties.Date?.date?.start || null,
         category: properties.Category?.select?.name || 'Uncategorized',
+        mood: properties.Mood?.select?.name || null,
         coverImage,
       };
     });

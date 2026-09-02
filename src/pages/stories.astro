@@ -81,6 +81,11 @@ import Layout from '../layouts/Layout.astro';
     <audio id="audio-liminal" loop preload="none" src="/audio/tim_kulig_free_music-backrooms-feeling-1-156115.mp3"></audio>
     <audio id="audio-dread" loop preload="none" src="/audio/logicallism-not-welcome-551350.mp3"></audio>
 
+    <!-- Reading progress, shown only while a story is open -->
+    <div class="reading-progress" id="reading-progress" aria-hidden="true">
+      <span id="reading-progress-bar"></span>
+    </div>
+
     <main class="px-6 py-8">
       <div class="max-w-4xl mx-auto">
         <!-- Intro -->
@@ -150,6 +155,16 @@ import Layout from '../layouts/Layout.astro';
                 <h2 class="reader-title" id="reader-title"></h2>
                 <div class="reader-meta" id="reader-meta"></div>
                 <div class="reader-text" id="reader-text"></div>
+                <div class="reader-nav">
+                  <button class="reader-nav-btn" id="reader-prev" type="button">
+                    <span class="nav-arrow">&#8592;</span>
+                    <span class="nav-label" id="reader-prev-label">Previous</span>
+                  </button>
+                  <button class="reader-nav-btn" id="reader-next" type="button">
+                    <span class="nav-label" id="reader-next-label">Next</span>
+                    <span class="nav-arrow">&#8594;</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -771,6 +786,131 @@ import Layout from '../layouts/Layout.astro';
       padding-left: 0.25rem;
     }
 
+    /* Reading progress */
+    .reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 1200;
+      background: rgba(120, 100, 160, 0.15);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .reading-progress.active {
+      opacity: 1;
+    }
+
+    .reading-progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, rgba(140, 120, 180, 0.9), rgba(200, 180, 240, 0.95));
+      box-shadow: 0 0 10px rgba(180, 160, 220, 0.6);
+      transition: width 0.1s linear;
+    }
+
+    /* Prev / next inside the reader */
+    .reader-nav {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(120, 100, 160, 0.2);
+    }
+
+    .reader-nav-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(30, 25, 45, 0.6);
+      border: 1px solid rgba(120, 100, 160, 0.25);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.8rem;
+      font-weight: 300;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .reader-nav-btn:last-child {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .reader-nav-btn:hover:not(:disabled) {
+      background: rgba(50, 40, 75, 0.7);
+      border-color: rgba(150, 130, 190, 0.4);
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .reader-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .reader-nav-btn .nav-arrow {
+      flex: none;
+      color: rgba(180, 160, 220, 0.8);
+    }
+
+    .reader-nav-btn .nav-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Paragraphs now that the reader gets real markup */
+    .reader-text p {
+      margin-bottom: 1.15rem;
+    }
+
+    .reader-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Read / resume markers on cards */
+    .card-readtime {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .card-read,
+    .card-resume {
+      font-size: 0.62rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-read {
+      background: rgba(90, 130, 100, 0.3);
+      color: rgba(170, 220, 180, 0.9);
+    }
+
+    .card-resume {
+      background: rgba(150, 120, 60, 0.3);
+      color: rgba(240, 210, 150, 0.9);
+    }
+
+    /* Tub holds still and listens while a story is open */
+    .spooky-tub-container.listening {
+      animation: spooky-tub-listen 3.2s ease-in-out infinite;
+    }
+
+    @keyframes spooky-tub-listen {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
     /* Mobile Adjustments */
     @media (max-width: 768px) {
       .filter-tabs {
@@ -795,6 +935,15 @@ import Layout from '../layouts/Layout.astro';
 
       .stories-wrapper.list-view .card-cover {
         flex: 0 0 110px;
+      }
+
+      .reader-nav {
+        flex-direction: column;
+      }
+
+      .reader-nav-btn:last-child {
+        justify-content: flex-start;
+        text-align: left;
       }
 
       .reader-title {
@@ -1020,6 +1169,54 @@ import Layout from '../layouts/Layout.astro';
   </style>
 
   <script>
+    // Stories State
+    let allStories: any[] = [];
+    let visibleStories: any[] = [];
+    let currentFilter = 'all';
+    let currentView = 'grid';
+    let currentStoryId: string | null = null;
+    let storyMood: string | null = null;
+    let readProgress = 0;
+    let stormBoost = 0;      // storm layers swell as you read toward the end
+    let tubListening = false;
+
+    function slugify(text: string): string {
+      return String(text || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    function readMinutes(content: string): number {
+      const words = String(content || '').replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length;
+      return Math.max(1, Math.round(words / 225));
+    }
+
+    /* Per-visitor reading state. Wrapped because localStorage throws outright
+       in some privacy modes rather than just returning null. */
+    const READ_KEY = 'darkTales.reading';
+
+    function loadReadState(): Record<string, { p: number; done: boolean }> {
+      try {
+        return JSON.parse(localStorage.getItem(READ_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveReadState() {
+      try {
+        localStorage.setItem(READ_KEY, JSON.stringify(readState));
+      } catch {
+        /* private mode - reading state just will not persist */
+      }
+    }
+
+    let readState = loadReadState();
+    let lastSaved = 0;
+
     // Lightning effect
     const lightningFlash = document.getElementById('lightning-flash');
     const lightningBolts = document.getElementById('lightning-bolts');
@@ -1127,7 +1324,8 @@ import Layout from '../layouts/Layout.astro';
 
     // El Catatumbo has near-constant lightning
     function scheduleLightning() {
-      const delay = Math.random() * 2500 + 400;
+      // Up to ~2x more frequent by the end of a story
+      const delay = (Math.random() * 2500 + 400) * (1 - stormBoost * 0.55);
       setTimeout(() => {
         triggerLightning();
 
@@ -1148,10 +1346,6 @@ import Layout from '../layouts/Layout.astro';
 
     scheduleLightning();
 
-    // Stories State
-    let allStories: any[] = [];
-    let currentFilter = 'all';
-    let currentView = 'grid';
 
     // Sort stories by category (alphabetically), then by title within each category
     function sortStories(stories: any[]) {
@@ -1184,6 +1378,12 @@ import Layout from '../layouts/Layout.astro';
     function renderStoryCard(story: any): string {
       const preview = getPreview(story.content);
       const hasCover = !!story.coverImage;
+      const progress = readState[slugify(story.title)];
+      const marker = progress?.done
+        ? '<span class="card-read">Read</span>'
+        : (progress && progress.p > 0.15
+            ? `<span class="card-resume">${Math.round(progress.p * 100)}% read</span>`
+            : '');
 
       return `
         <article class="story-card-new${hasCover ? ' has-cover' : ''}" data-story-id="${story.id}" data-category="${story.category || 'Uncategorized'}">
@@ -1198,6 +1398,8 @@ import Layout from '../layouts/Layout.astro';
               <div class="card-meta">
                 <span class="card-category">${story.category || 'Uncategorized'}</span>
                 ${story.date ? `<span class="card-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>` : ''}
+                <span class="card-readtime">${readMinutes(story.content)} min</span>
+                ${marker}
               </div>
             </div>
             <div class="card-preview">
@@ -1216,7 +1418,7 @@ import Layout from '../layouts/Layout.astro';
     }
 
     // Open story in reader
-    function openReader(story: any) {
+    function openReader(story: any, opts: { push?: boolean } = {}) {
       const reader = document.getElementById('story-reader');
       const readerCover = document.getElementById('reader-cover');
       const readerTitle = document.getElementById('reader-title');
@@ -1243,8 +1445,27 @@ import Layout from '../layouts/Layout.astro';
         <span class="card-category">${story.category || 'Uncategorized'}</span>
         ${story.date ? `<span class="card-date">${new Date(story.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>` : ''}
       `;
-      // Convert newlines to <br> tags and set as HTML to render links
-      readerText.innerHTML = story.content.replace(/\n/g, '<br>');
+      // Content already arrives as paragraph markup from the API
+      readerText.innerHTML = story.content;
+      currentStoryId = story.id;
+
+      // Score the story with its own mood, if Notion gives one. A manual
+      // pick from the dropdown (autoMood off) stays in charge.
+      storyMood = resolveMood(story.mood);
+      if (storyMood && isPlaying && autoMood) {
+        setMoodByName(storyMood);
+      }
+
+      updateReaderNav();
+      readProgress = 0;
+      stormBoost = 0;
+      setProgressBar(0, true);
+      setTubListening(true);
+
+      if (opts.push !== false) {
+        const slug = slugify(story.title);
+        history.pushState({ reader: true, slug }, '', `?story=${slug}`);
+      }
 
       // Show reader
       reader.classList.remove('hidden');
@@ -1253,9 +1474,14 @@ import Layout from '../layouts/Layout.astro';
       const wrapper = document.getElementById('stories-wrapper');
       if (wrapper) wrapper.style.display = 'none';
 
-      // Scroll to reader
+      // Scroll to the reader, or back to where they stopped reading
+      const saved = readState[slugify(story.title)];
       setTimeout(() => {
-        reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (saved && !saved.done && saved.p > 0.15) {
+          restoreProgress(saved.p);
+        } else {
+          reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }, 50);
     }
 
@@ -1267,26 +1493,170 @@ import Layout from '../layouts/Layout.astro';
       if (reader) reader.classList.add('hidden');
       if (wrapper) wrapper.style.display = '';
 
+      currentStoryId = null;
+      storyMood = null;
+      stormBoost = 0;
+      setProgressBar(0, false);
+      setTubListening(false);
+
+      // Hand the soundtrack back to Auto
+      if (isPlaying && autoMood) setMood();
+
       // Remove active state from cards
       document.querySelectorAll('.story-card-new.active').forEach(c => c.classList.remove('active'));
+
+      // Repaint cards so the read markers reflect what just happened
+      renderStories();
+    }
+
+    /* Closing routes through history so the browser Back button and the close
+       button end up in the same place. A visitor who landed directly on
+       ?story=... has no entry to go back to, so strip the param instead. */
+    function requestClose() {
+      if (history.state && history.state.reader) {
+        history.back();
+      } else {
+        history.replaceState({}, '', location.pathname);
+        closeReader();
+      }
+    }
+
+    function readerIsOpen(): boolean {
+      const reader = document.getElementById('story-reader');
+      return !!reader && !reader.classList.contains('hidden');
+    }
+
+    function setProgressBar(value: number, active: boolean) {
+      const wrap = document.getElementById('reading-progress');
+      const bar = document.getElementById('reading-progress-bar');
+      if (bar) bar.style.width = `${Math.round(value * 100)}%`;
+      if (wrap) wrap.classList.toggle('active', active);
+    }
+
+    // How far through the open story the viewport has travelled
+    function computeProgress(): number {
+      const reader = document.getElementById('story-reader');
+      if (!reader) return 0;
+      const rect = reader.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      if (scrollable <= 40) return 1;
+      return Math.min(1, Math.max(0, -rect.top / scrollable));
+    }
+
+    function restoreProgress(fraction: number) {
+      const reader = document.getElementById('story-reader');
+      if (!reader) return;
+      const rect = reader.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      const top = window.scrollY + rect.top + Math.max(0, scrollable) * fraction;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    function onReadScroll() {
+      if (!readerIsOpen()) return;
+
+      readProgress = computeProgress();
+      stormBoost = readProgress;
+      setProgressBar(readProgress, true);
+
+      const story = allStories.find(s => s.id === currentStoryId);
+      if (!story) return;
+
+      const slug = slugify(story.title);
+      const entry = readState[slug] || { p: 0, done: false };
+      entry.p = Math.max(entry.p, readProgress);
+      if (readProgress > 0.9) entry.done = true;
+      readState[slug] = entry;
+
+      // Throttled - scroll fires far too often to write storage on each one
+      const now = Date.now();
+      if (now - lastSaved > 1000) {
+        lastSaved = now;
+        saveReadState();
+      }
+    }
+
+    function currentIndex(): number {
+      return visibleStories.findIndex(s => s.id === currentStoryId);
+    }
+
+    function updateReaderNav() {
+      const i = currentIndex();
+      const prev = i > 0 ? visibleStories[i - 1] : null;
+      const next = i >= 0 && i < visibleStories.length - 1 ? visibleStories[i + 1] : null;
+
+      const prevBtn = document.getElementById('reader-prev') as HTMLButtonElement | null;
+      const nextBtn = document.getElementById('reader-next') as HTMLButtonElement | null;
+      const prevLabel = document.getElementById('reader-prev-label');
+      const nextLabel = document.getElementById('reader-next-label');
+
+      if (prevBtn) prevBtn.disabled = !prev;
+      if (nextBtn) nextBtn.disabled = !next;
+      if (prevLabel) prevLabel.textContent = prev ? prev.title : 'Previous';
+      if (nextLabel) nextLabel.textContent = next ? next.title : 'Next';
+    }
+
+    function gotoStory(delta: number) {
+      const i = currentIndex();
+      if (i < 0) return;
+      const target = visibleStories[i + delta];
+      if (target) openReader(target);
+    }
+
+    function setTubListening(on: boolean) {
+      tubListening = on;
+      const tub = document.getElementById('spooky-tub');
+      if (!tub) return;
+      tub.classList.toggle('listening', on);
+      if (on) tub.classList.remove('walking');
     }
 
     // Setup reader close button
-    function setupReader() {
-      const closeBtn = document.getElementById('reader-close');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', closeReader);
-      }
+    let readerWired = false;
 
-      // Also close on Escape key
+    function setupReader() {
+      // loadStories can run more than once; the listeners below are global
+      if (readerWired) return;
+      readerWired = true;
+
+      document.getElementById('reader-close')?.addEventListener('click', requestClose);
+      document.getElementById('reader-prev')?.addEventListener('click', () => gotoStory(-1));
+      document.getElementById('reader-next')?.addEventListener('click', () => gotoStory(1));
+
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          const reader = document.getElementById('story-reader');
-          if (reader && !reader.classList.contains('hidden')) {
-            closeReader();
+        if (!readerIsOpen()) return;
+
+        // Leave the mood dropdown and volume slider their own arrow keys
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'SELECT' || tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (e.key === 'Escape') requestClose();
+        if (e.key === 'ArrowLeft') gotoStory(-1);
+        if (e.key === 'ArrowRight') gotoStory(1);
+      });
+
+      window.addEventListener('scroll', onReadScroll, { passive: true });
+      window.addEventListener('resize', onReadScroll);
+
+      window.addEventListener('popstate', () => {
+        const slug = new URLSearchParams(location.search).get('story');
+        if (slug) {
+          const story = allStories.find(s => slugify(s.title) === slug);
+          if (story) {
+            openReader(story, { push: false });
+            return;
           }
         }
+        closeReader();
       });
+    }
+
+    // A shared ?story=... link opens straight into that tale
+    function openFromUrl() {
+      const slug = new URLSearchParams(location.search).get('story');
+      if (!slug) return;
+      const story = allStories.find(s => slugify(s.title) === slug);
+      if (story) openReader(story, { push: false });
     }
 
     // Render filter tabs
@@ -1331,6 +1701,8 @@ import Layout from '../layouts/Layout.astro';
         return;
       }
 
+      // Prev/next walks the list as currently filtered and sorted
+      visibleStories = filteredStories;
       container.innerHTML = filteredStories.map(renderStoryCard).join('');
 
       // Add click handlers to open reader
@@ -1393,12 +1765,13 @@ import Layout from '../layouts/Layout.astro';
           renderStories();
           setupViewToggle();
           setupReader();
+          openFromUrl();
         } else {
           container.innerHTML = `
             <div class="empty-state">
               <div class="empty-state-icon">🌑</div>
               <p>No stories have emerged from the darkness yet.</p>
-              <p class="text-sm mt-2">Check back soon, or submit your own below.</p>
+              <p class="text-sm mt-2">Check back soon.</p>
             </div>
           `;
         }
@@ -1464,13 +1837,18 @@ import Layout from '../layouts/Layout.astro';
       }
     });
 
+    // Storm layers that reading progress is allowed to push harder
+    const STORM_KEYS = new Set(['storm1', 'storm2']);
+
     // Smoothly fade volumes toward targets
     function updateVolumes() {
       Object.keys(tracks).forEach(key => {
         const track = tracks[key as keyof typeof tracks];
         if (!track) return;
 
-        const target = targetVolumes[key] * masterVolume;
+        // The mood table is the floor; deep in a story the storm rises above it
+        const boost = STORM_KEYS.has(key) ? stormBoost * 0.22 : 0;
+        const target = Math.min(1, targetVolumes[key] + boost) * masterVolume;
         const current = currentVolumes[key];
 
         if (Math.abs(target - current) > 0.01) {
@@ -1512,6 +1890,34 @@ import Layout from '../layouts/Layout.astro';
       liminal: 8, void: 5, haunted: 7, dread: 6, nightmare: 4,
     };
 
+    /* Notion's Mood select holds the friendly labels from the dropdown, so
+       accept those as well as the raw keys, case-insensitively. Anything
+       unrecognised falls through to Auto. */
+    const MOOD_LABELS: Record<string, string> = {
+      'quiet night': 'quiet',
+      'enigmatic': 'enigmatic',
+      'suspense': 'suspense',
+      'storm': 'storm',
+      'full storm': 'fullstorm',
+      'creepy': 'creepy',
+      'eerie calm': 'calm',
+      'dark & mysterious': 'dark',
+      'dark and mysterious': 'dark',
+      'tension': 'tension',
+      'liminal': 'liminal',
+      'the void': 'void',
+      'haunted': 'haunted',
+      'creeping dread': 'dread',
+      'nightmare': 'nightmare',
+    };
+
+    function resolveMood(raw: string | null): string | null {
+      if (!raw) return null;
+      const key = String(raw).trim().toLowerCase();
+      if (MOODS[key]) return key;
+      return MOOD_LABELS[key] || null;
+    }
+
     // Set a specific mood by name
     function setMoodByName(name: string) {
       const mood = MOODS[name] || {};
@@ -1523,6 +1929,12 @@ import Layout from '../layouts/Layout.astro';
     // Pick a weighted-random mood
     function setMood() {
       if (!autoMood) return;
+
+      // While a scored story is open, hold its mood instead of drifting
+      if (storyMood) {
+        setMoodByName(storyMood);
+        return;
+      }
 
       const names = Object.keys(MOOD_WEIGHTS);
       const total = names.reduce((sum, n) => sum + MOOD_WEIGHTS[n], 0);
@@ -1704,19 +2116,29 @@ import Layout from '../layouts/Layout.astro';
         } else {
           // Reached target, pause then pick new one
           spookyTub.classList.remove('walking');
-          setTimeout(() => {
-            if (tubState === 'wandering') {
-              // Sometimes get spooked by lightning
-              if (Math.random() > 0.7) {
-                spookyTub.classList.add('spooked');
-                setTimeout(() => spookyTub.classList.remove('spooked'), 600);
-              }
-              pickWanderTarget();
-              spookyTub.classList.add('walking');
-              wander();
-            }
-          }, 2000 + Math.random() * 3000);
+          restThenWander();
         }
+      }
+
+      function restThenWander() {
+        setTimeout(() => {
+          if (tubState !== 'wandering') return;
+
+          // While a story is open he settles and listens instead of roaming
+          if (tubListening) {
+            restThenWander();
+            return;
+          }
+
+          // Sometimes get spooked by lightning
+          if (Math.random() > 0.7) {
+            spookyTub.classList.add('spooked');
+            setTimeout(() => spookyTub.classList.remove('spooked'), 600);
+          }
+          pickWanderTarget();
+          spookyTub.classList.add('walking');
+          wander();
+        }, 2000 + Math.random() * 3000);
       }
 
       function startSpookyTub() {
