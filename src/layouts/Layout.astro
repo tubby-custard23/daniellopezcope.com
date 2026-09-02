@@ -78,6 +78,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
 
     <!-- Rain, shared by real weather and Konami mode -->
     <canvas id="rain-canvas" class="rain-canvas" aria-hidden="true"></canvas>
+    <div id="spooky-veil" class="spooky-veil" aria-hidden="true"></div>
     <div id="spooky-flash" class="spooky-flash" aria-hidden="true"></div>
 
     <!-- Storm toggle -->
@@ -300,9 +301,13 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           /* Where he was when you left the last page. sessionStorage rather
              than localStorage so a brand new visit still gets the entrance. */
           let tubX = -650;
+          let wasRemembered = false;
           try {
             const remembered = sessionStorage.getItem('tubX');
-            if (remembered !== null) tubX = Number(remembered);
+            if (remembered !== null && Number.isFinite(Number(remembered))) {
+              tubX = Number(remembered);
+              wasRemembered = true;
+            }
           } catch { /* private mode */ }
 
           let asleep = false;
@@ -571,7 +576,8 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             boneVY = 0;
             falling = true;
 
-            tubX = -650;
+            // Only march in from off-screen if he has no remembered spot
+            if (!wasRemembered) tubX = -650;
             setDirection(true);
             render();
             bone.classList.add('show');

@@ -1342,19 +1342,21 @@ h1, h2, h3, h4, h5, h6 {
 /* Paw prints - each one removes itself when this animation ends */
 .paw-print {
   position: fixed;
-  width: 9px;
-  height: 9px;
-  border-radius: 50% 50% 45% 45%;
-  background: rgba(181, 131, 90, 0.5);
+  width: 12px;
+  height: 12px;
+  border-radius: 52% 52% 44% 44%;
+  background: rgba(181, 131, 90, 0.72);
+  box-shadow: 0 0 5px rgba(74, 55, 40, 0.4);
   z-index: 998;
   pointer-events: none;
-  animation: paw-fade 3s ease-out forwards;
+  animation: paw-fade 4.5s ease-out forwards;
 }
 
 @keyframes paw-fade {
-  0%   { opacity: 0.75; transform: scale(0.7); }
-  15%  { opacity: 0.6;  transform: scale(1); }
-  100% { opacity: 0;    transform: scale(1); }
+  0%   { opacity: 0; transform: scale(0.5); }
+  8%   { opacity: 0.9; transform: scale(1); }
+  55%  { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
 }
 
 /* ---------------------------------------------------------- Konami mode */
@@ -1391,11 +1393,6 @@ html.spooky .spooky-flash.strike {
   100% { opacity: 0; }
 }
 
-/* Drain the warmth out of the whole site */
-html.spooky body {
-  filter: saturate(0.55) brightness(0.82) contrast(1.08);
-}
-
 html.spooky .card,
 html.spooky .nav-button {
   border-color: rgba(150, 130, 190, 0.35) !important;
@@ -1406,7 +1403,7 @@ html.spooky .nav-button {
   html.spooky .spooky-flash.strike { animation: none; opacity: 0; }
   .dachshund-container.sleeping,
   .dachshund-container.sleeping::after { animation: none; }
-  .paw-print { animation: paw-fade 3s linear forwards; }
+  .paw-print { animation: paw-fade 4.5s linear forwards; }
 }
 
 
@@ -1451,23 +1448,30 @@ html.night .landscape-bg { filter: saturate(0.7) brightness(0.62); }
 html.day .landscape-overlay { opacity: 0.85; }
 html.night .landscape-overlay { opacity: 1; }
 
-/* Cards lighten just enough to feel like daytime while staying dark
-   enough for white text to hold */
-html.day .card {
-  background: linear-gradient(135deg, rgba(96, 104, 116, 0.78) 0%, rgba(74, 80, 92, 0.84) 100%);
-  border-color: rgba(200, 210, 225, 0.22);
-}
-
-html.day .nav-button {
-  background: rgba(96, 104, 116, 0.5);
-  border-color: rgba(200, 210, 225, 0.28);
-}
+/* Cards keep their designed brown in both modes. Tinting them slate was
+   wrong - the warmth is the point. */
 
 /* Konami mode is a storm - it forces night regardless of the clock */
+/* A filter on body would make it a containing block for every
+   position: fixed descendant, which breaks the landscape (it stretches to
+   the document height and background-size: cover magnifies it), the paw
+   prints, the tub and the bone. A veil layer gets the same mood with no
+   side effects. */
 html.spooky body {
   background: linear-gradient(180deg, #10131c 0%, #0b0b0f 55%, #08080a 100%);
-  filter: saturate(0.55) brightness(0.82) contrast(1.08);
 }
+
+.spooky-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(10, 12, 20, 0.45);
+  transition: opacity 1.2s ease;
+}
+
+html.spooky .spooky-veil { opacity: 1; }
 
 /* Storm toggle. Sits above the bone but below the mobile menu, and is a
    real <button> so the bone's landing check already treats it as something
