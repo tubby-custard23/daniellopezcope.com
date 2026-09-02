@@ -323,10 +323,18 @@ const socials = [
       try {
         const response = await fetch('/api/tautulli');
         const data = await response.json();
-        console.log('Tautulli API response:', data);
 
-        if (data.response?.data?.data && data.response.data.data.length > 0) {
-          const history = data.response.data.data;
+        // An unreachable or misconfigured Tautulli is not the same thing as
+        // an empty history - don't report a broken connector as "no watches".
+        if (!response.ok) {
+          console.error('Tautulli API error:', data.error, data.details);
+          container.innerHTML = '<p class="text-white/50 text-sm">Watch history is temporarily unavailable.</p>';
+          return;
+        }
+
+        const history = data.response?.data?.data ?? [];
+
+        if (history.length > 0) {
           container.innerHTML = `<div class="watch-container">${history.map((item: any) => {
             const isTV = item.media_type === 'episode';
             const title = isTV
