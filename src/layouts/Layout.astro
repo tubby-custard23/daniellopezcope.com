@@ -75,6 +75,10 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
       </div>
     )}
 
+    <!-- Konami mode: inert until the code is entered -->
+    <div id="spooky-rain" class="spooky-rain" aria-hidden="true"></div>
+    <div id="spooky-flash" class="spooky-flash" aria-hidden="true"></div>
+
     <!-- Main Content -->
     <main class={showNav ? "pt-20 relative z-10" : "relative z-10"}>
       <slot />
@@ -109,6 +113,8 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
         { group: 'bone', key: 'bone.bounce',  label: 'bounce',      min: 0,   max: 0.9, step: 0.05, value: 0.35 },
         { group: 'bone', key: 'bone.ground',  label: 'ground line', min: 0,   max: 200, step: 2,    value: 24 },
         { group: 'tub',  key: 'tub.speed',    label: 'top speed',   min: 1,   max: 20,  step: 0.5,  value: 6 },
+        { group: 'tub',  key: 'tub.sleepAfter', label: 'sleep after (s)', min: 5, max: 300, step: 5,  value: 45 },
+        { group: 'tub',  key: 'tub.pawGap',    label: 'paw print gap',   min: 0, max: 400, step: 10, value: 150 },
       ]);
 
       mountTweakPanel();
@@ -142,6 +148,58 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
         });
       });
 
+      /* ------------------------------------------------------ Konami mode
+       *
+       * Stored in sessionStorage rather than a local flag, so the storm
+       * follows you from page to page instead of resetting on navigation.
+       */
+      const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+      let konamiAt = 0;
+      let spookyTimer: ReturnType<typeof setTimeout> | null = null;
+
+      function spookyFlash() {
+        const flash = document.getElementById('spooky-flash');
+        if (flash) {
+          flash.classList.remove('strike');
+          void flash.offsetWidth;   // force a reflow so the animation restarts
+          flash.classList.add('strike');
+        }
+        spookyTimer = setTimeout(spookyFlash, 1800 + Math.random() * 5000);
+      }
+
+      function setSpooky(on: boolean) {
+        document.documentElement.classList.toggle('spooky', on);
+        try {
+          if (on) sessionStorage.setItem('spooky', '1');
+          else sessionStorage.removeItem('spooky');
+        } catch { /* private mode */ }
+
+        if (on && !spookyTimer) {
+          spookyFlash();
+        } else if (!on && spookyTimer) {
+          clearTimeout(spookyTimer);
+          spookyTimer = null;
+        }
+      }
+
+      try {
+        if (sessionStorage.getItem('spooky') === '1') setSpooky(true);
+      } catch { /* private mode */ }
+
+      document.addEventListener('keydown', (e) => {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+        // Compare case-insensitively so caps lock does not defeat the b and a
+        const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        konamiAt = key === KONAMI[konamiAt] ? konamiAt + 1 : (key === KONAMI[0] ? 1 : 0);
+
+        if (konamiAt === KONAMI.length) {
+          konamiAt = 0;
+          setSpooky(!document.documentElement.classList.contains('spooky'));
+        }
+      });
+
       // Dachshund (Tub) Easter egg - drag the bone anywhere, drop it, Tub trots over
       document.addEventListener('DOMContentLoaded', () => {
         const dachshund = document.getElementById('dachshund') as HTMLElement | null;
@@ -173,7 +231,17 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           let lastPointerX = 0;
           let dragDistance = 0;
 
+          /* Where he was when you left the last page. sessionStorage rather
+             than localStorage so a brand new visit still gets the entrance. */
           let tubX = -650;
+          try {
+            const remembered = sessionStorage.getItem('tubX');
+            if (remembered !== null) tubX = Number(remembered);
+          } catch { /* private mode */ }
+
+          let asleep = false;
+          let lastPawX = tubX;
+          let sleepTimer: ReturnType<typeof setTimeout> | null = null;
           let tubY = GROUND() - 150;
           let facingRight = true;
           let walking = false;
@@ -231,6 +299,46 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             }
           }
 
+          /* Anything that spawns DOM elements forever needs a removal path.
+             Each print deletes itself when its fade animation ends, with a
+             timeout as a backstop in case animationend never fires (it does
+             not, for instance, on a background tab). */
+          /* A timeout rather than a per-frame clock check. Watching the clock
+             inside the render loop would force the loop to stay alive just to
+             watch it, undoing the whole point of parking it when idle. */
+          function scheduleSleep() {
+            if (sleepTimer) clearTimeout(sleepTimer);
+            sleepTimer = setTimeout(() => {
+              asleep = true;
+              dachshund.classList.add('sleeping');
+            }, Math.max(1, tweak('tub.sleepAfter')) * 1000);
+          }
+
+          function wake() {
+            if (asleep) {
+              asleep = false;
+              dachshund.classList.remove('sleeping');
+              kick();
+            }
+            scheduleSleep();
+          }
+
+          function dropPawPrint() {
+            const gap = tweak('tub.pawGap');
+            if (gap <= 0 || Math.abs(tubX - lastPawX) < gap) return;
+            lastPawX = tubX;
+
+            const print = document.createElement('div');
+            print.className = 'paw-print';
+            print.style.left = `${tubX + (facingRight ? 300 : 330)}px`;
+            print.style.bottom = `${GROUND() + 4}px`;
+            document.body.appendChild(print);
+
+            const remove = () => print.remove();
+            print.addEventListener('animationend', remove, { once: true });
+            setTimeout(remove, 4000);
+          }
+
           function render() {
             tubY = GROUND() - 150;
             bone.style.left = `${boneX}px`;
@@ -274,6 +382,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
               const speed = Math.min(TOP_SPEED(), Math.abs(dx) * 0.04 + 1.5);
               tubX += Math.sign(dx) * speed;
               atBone = false;
+              dropPawPrint();
               if (!walking) {
                 walking = true;
                 dachshund.classList.add('walking');
@@ -290,9 +399,12 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             // Beg when the bone is dangled overhead
             dachshund.classList.toggle('begging', dragging && atBone && boneY > GROUND() + 60);
 
+
             render();
 
-            // Nothing left to animate - park the loop until the bone moves again
+            // Remember his spot for the next page
+            try { sessionStorage.setItem('tubX', String(Math.round(tubX))); } catch {}
+
             if (!dragging && !falling && atBone) {
               ticking = false;
               return;
@@ -381,6 +493,11 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             kick();
           });
 
+          // Any sign of life wakes him back up and restarts the countdown
+          ['pointermove', 'pointerdown', 'keydown', 'scroll'].forEach(type => {
+            window.addEventListener(type, wake, { passive: true });
+          });
+
           function startSequence() {
             boneX = clamp(window.innerWidth - 160, 0, maxBoneX());
             boneY = Math.min(window.innerHeight * 0.55, 420);
@@ -397,6 +514,8 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             setTimeout(() => {
               dachshund.classList.add('visible');
             }, 500);
+
+            scheduleSleep();
           }
 
           // Check if we should start
