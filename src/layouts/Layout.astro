@@ -100,6 +100,19 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
     )}
 
     <script>
+      import { defineTweaks, tweak, onTweakChange, mountTweakPanel } from '../scripts/tweaks';
+
+      // Knobs this page owns. Defaults mirror the committed constants, so a
+      // fresh visitor sees exactly what the source says.
+      defineTweaks([
+        { group: 'bone', key: 'bone.gravity', label: 'gravity',     min: 0.1, max: 3,   step: 0.05, value: 0.9 },
+        { group: 'bone', key: 'bone.bounce',  label: 'bounce',      min: 0,   max: 0.9, step: 0.05, value: 0.35 },
+        { group: 'bone', key: 'bone.ground',  label: 'ground line', min: 0,   max: 200, step: 2,    value: 24 },
+        { group: 'tub',  key: 'tub.speed',    label: 'top speed',   min: 1,   max: 20,  step: 0.5,  value: 6 },
+      ]);
+
+      mountTweakPanel();
+
       // Nav mobile menu toggle
       document.addEventListener('DOMContentLoaded', () => {
         const navMenuBtn = document.getElementById('nav-mobile-menu-btn');
@@ -137,9 +150,12 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
         if (dachshund && bone) {
           const BONE_W = 80;
           const BONE_H = 35;
-          const GROUND = 24;         // css bottom the bone always comes to rest at
-          const GRAVITY = 0.9;
-          const BOUNCE = 0.35;
+          /* Read through the store rather than captured once, so a slider in
+             the tweak panel takes effect on the very next frame. */
+          const GROUND = () => tweak('bone.ground');
+          const GRAVITY = () => tweak('bone.gravity');
+          const BOUNCE = () => tweak('bone.bounce');
+          const TOP_SPEED = () => tweak('tub.speed');
           const TUB_W = 640;
           const NOSE_RIGHT = 375;    // container left offset that puts his nose on the bone
           const NOSE_LEFT = 150;
@@ -147,7 +163,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           const ARRIVE = 12;
 
           let boneX = -200;
-          let boneY = GROUND;
+          let boneY = GROUND();
           let boneVX = 0;
           let boneVY = 0;
           let falling = false;
@@ -158,7 +174,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           let dragDistance = 0;
 
           let tubX = -650;
-          const tubY = GROUND - 150;
+          let tubY = GROUND() - 150;
           let facingRight = true;
           let walking = false;
           let atBone = false;
@@ -216,6 +232,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           }
 
           function render() {
+            tubY = GROUND() - 150;
             bone.style.left = `${boneX}px`;
             bone.style.bottom = `${boneY}px`;
             dachshund.style.left = `${tubX}px`;
@@ -225,15 +242,15 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
           function tick() {
             // Bone physics - only while it's in the air and not being held
             if (!dragging && falling) {
-              boneVY -= GRAVITY;
+              boneVY -= GRAVITY();
               boneY += boneVY;
               boneX = clamp(boneX + boneVX, 0, maxBoneX());
               boneVX *= 0.94;
 
-              if (boneY <= GROUND) {
-                boneY = GROUND;
+              if (boneY <= GROUND()) {
+                boneY = GROUND();
                 if (Math.abs(boneVY) > 4) {
-                  boneVY = Math.abs(boneVY) * BOUNCE;
+                  boneVY = Math.abs(boneVY) * BOUNCE();
                 } else {
                   boneVY = 0;
                   boneVX = 0;
@@ -254,7 +271,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             const dx = targetX - tubX;
 
             if (Math.abs(dx) > ARRIVE) {
-              const speed = Math.min(6, Math.abs(dx) * 0.04 + 1.5);
+              const speed = Math.min(TOP_SPEED(), Math.abs(dx) * 0.04 + 1.5);
               tubX += Math.sign(dx) * speed;
               atBone = false;
               if (!walking) {
@@ -271,7 +288,7 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             }
 
             // Beg when the bone is dangled overhead
-            dachshund.classList.toggle('begging', dragging && atBone && boneY > GROUND + 60);
+            dachshund.classList.toggle('begging', dragging && atBone && boneY > GROUND() + 60);
 
             render();
 
@@ -288,6 +305,15 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             ticking = true;
             requestAnimationFrame(tick);
           }
+
+          /* The loop parks itself once everything is at rest, so a slider
+             moved while the bone is idle would appear to do nothing. Wake it
+             and let the bone re-settle against the new numbers. */
+          onTweakChange(() => {
+            atBone = false;
+            falling = true;
+            kick();
+          });
 
           // --- Drag and drop -----------------------------------------------
           bone.addEventListener('pointerdown', (e) => {
@@ -318,8 +344,8 @@ const { title, showNav = false, showLandscape = false, showTub = true, scrollabl
             const nextX = clamp(evt.clientX - grabDX, 0, maxBoneX());
             const nextY = clamp(
               window.innerHeight - (evt.clientY - grabDY) - BONE_H,
-              GROUND,
-              Math.max(GROUND, window.innerHeight - BONE_H - 10)
+              GROUND(),
+              Math.max(GROUND(), window.innerHeight - BONE_H - 10)
             );
 
             dragDistance += Math.abs(nextX - boneX) + Math.abs(nextY - boneY);

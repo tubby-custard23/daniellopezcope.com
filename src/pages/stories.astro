@@ -1169,6 +1169,17 @@ import Layout from '../layouts/Layout.astro';
   </style>
 
   <script>
+    import { defineTweaks, tweak } from '../scripts/tweaks';
+
+    defineTweaks([
+      { group: 'storm', key: 'storm.gapMin',        label: 'min gap (ms)',    min: 100, max: 4000, step: 50,   value: 400 },
+      { group: 'storm', key: 'storm.gapSpread',     label: 'gap spread (ms)', min: 200, max: 8000, step: 100,  value: 2500 },
+      { group: 'storm', key: 'storm.readCadence',   label: 'reading cadence', min: 0,   max: 0.9,  step: 0.05, value: 0.55 },
+      { group: 'storm', key: 'storm.readBoost',     label: 'reading boost',   min: 0,   max: 0.6,  step: 0.02, value: 0.22 },
+      { group: 'audio', key: 'storm.audioThresh',   label: 'strike level',    min: 0,   max: 0.5,  step: 0.005, value: 0.11 },
+      { group: 'audio', key: 'storm.audioCooldown', label: 'strike gap (ms)', min: 120, max: 4000, step: 40,   value: 700 },
+    ]);
+
     // Stories State
     let allStories: any[] = [];
     let visibleStories: any[] = [];
@@ -1325,7 +1336,8 @@ import Layout from '../layouts/Layout.astro';
     // El Catatumbo has near-constant lightning
     function scheduleLightning() {
       // Up to ~2x more frequent by the end of a story
-      const delay = (Math.random() * 2500 + 400) * (1 - stormBoost * 0.55);
+      const delay = (Math.random() * tweak('storm.gapSpread') + tweak('storm.gapMin'))
+        * (1 - stormBoost * tweak('storm.readCadence'));
       setTimeout(() => {
         triggerLightning();
 
@@ -1847,7 +1859,7 @@ import Layout from '../layouts/Layout.astro';
         if (!track) return;
 
         // The mood table is the floor; deep in a story the storm rises above it
-        const boost = STORM_KEYS.has(key) ? stormBoost * 0.22 : 0;
+        const boost = STORM_KEYS.has(key) ? stormBoost * tweak('storm.readBoost') : 0;
         const target = Math.min(1, targetVolumes[key] + boost) * masterVolume;
         const current = currentVolumes[key];
 
@@ -1950,7 +1962,92 @@ import Layout from '../layouts/Layout.astro';
       setMoodByName('quiet');
     }
 
+    /* ------------------------------------------------ audio-reactive storm
+     *
+     * Two traps live in here:
+     *
+     * 1. Routing an <audio> element through createMediaElementSource takes it
+     *    off the default output. If the graph is not connected to
+     *    ctx.destination the page goes completely silent - and it looks like
+     *    the mixer broke rather than like a routing mistake.
+     *
+     * 2. createMediaElementSource throws if called twice for the same
+     *    element, so wiring is tracked and guarded.
+     *
+     * An analyser also only returns real samples for same-origin audio.
+     * These files are served from /audio on this domain, so it reads fine;
+     * a cross-origin CDN without CORS headers would hand back pure silence.
+     */
+    let audioCtx: AudioContext | null = null;
+    let analyser: AnalyserNode | null = null;
+    let analyserData: Uint8Array | null = null;
+    let lastStrike = 0;
+    const wiredTracks = new WeakSet<HTMLAudioElement>();
+
+    function ensureAnalyser() {
+      try {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+          if (!Ctx) return;
+
+          audioCtx = new Ctx();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 512;
+          analyser.smoothingTimeConstant = 0.7;
+          analyserData = new Uint8Array(analyser.fftSize);
+
+          // Trap 1: without this the speakers go quiet
+          analyser.connect(audioCtx.destination);
+
+          watchAmplitude();
+        }
+
+        // Contexts start suspended until a gesture unlocks them
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+
+        Object.values(tracks).forEach(track => {
+          if (!track || wiredTracks.has(track)) return;   // trap 2
+          try {
+            audioCtx!.createMediaElementSource(track).connect(analyser!);
+            wiredTracks.add(track);
+          } catch {
+            wiredTracks.add(track);
+          }
+        });
+      } catch (err) {
+        console.warn('[audio] analyser unavailable, storm stays on its timer', err);
+      }
+    }
+
+    // Root-mean-square of the waveform: loudness right now, 0..1
+    function watchAmplitude() {
+      if (!analyser || !analyserData) return;
+
+      analyser.getByteTimeDomainData(analyserData);
+      let sum = 0;
+      for (let i = 0; i < analyserData.length; i++) {
+        const sample = (analyserData[i] - 128) / 128;
+        sum += sample * sample;
+      }
+      const level = Math.sqrt(sum / analyserData.length);
+
+      const threshold = tweak('storm.audioThresh');
+      const now = performance.now();
+
+      // Additive: the timer still runs, so lightning works with audio off
+      if (threshold > 0 && level > threshold && now - lastStrike > tweak('storm.audioCooldown')) {
+        lastStrike = now;
+        triggerLightning();
+      }
+
+      requestAnimationFrame(watchAmplitude);
+    }
+
     function startMixer() {
+      // Created here because this runs inside the toggle's click handler,
+      // which is the gesture browsers require to unlock audio
+      ensureAnalyser();
+
       // Reset all volumes to 0 first
       Object.keys(currentVolumes).forEach(key => {
         currentVolumes[key] = 0;
