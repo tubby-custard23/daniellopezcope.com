@@ -1432,93 +1432,38 @@ html.night body {
   background-attachment: fixed;
 }
 
-/* Daylight has to do two things, and the first attempt only did one.
-   Inverting the ink is easy. But contrast on this site never came from a
-   dark scrim - .landscape-overlay is a warm tint - it came from the cards
-   themselves being near-opaque dark brown. Invert the text without also
-   lightening the cards and you get dark ink on a dark card. */
+/* Daylight is a tonal shift inside the dark design, not a light theme.
+   Three attempts at inverting to light failed for the same structural
+   reason: the site is white ink over a busy photographic background, and
+   contrast comes from near-opaque dark cards. Every light surface has to
+   fight that, and stacking light veils to compensate just bleaches the
+   page. So daytime instead means an airier slate palette with more of the
+   landscape showing through, and night means the deep black it always was.
+   Ink stays white throughout, so nothing needs inverting. */
 
-html.day body { color: #241c14; }
+/* Deliberately not touching .black-overlay: it starts opaque and the
+   hold-to-enter animation fades it out, so forcing an opacity here would
+   reveal the landscape before the intro finished. The artwork filter
+   carries the day/night difference on its own. */
+html.day .landscape-bg { filter: saturate(0.95) brightness(1.02); }
+html.night .landscape-bg { filter: saturate(0.7) brightness(0.62); }
 
-html.day .text-white { color: #241c14 !important; }
-html.day .text-white\/90 { color: rgba(36, 28, 20, 0.9) !important; }
-html.day .text-white\/80 { color: rgba(36, 28, 20, 0.84) !important; }
-html.day .text-white\/70 { color: rgba(36, 28, 20, 0.78) !important; }
-html.day .text-white\/60 { color: rgba(36, 28, 20, 0.72) !important; }
-html.day .text-white\/50 { color: rgba(36, 28, 20, 0.66) !important; }
-html.day .text-white\/40 { color: rgba(36, 28, 20, 0.58) !important; }
-html.day .text-white\/30 { color: rgba(36, 28, 20, 0.5) !important; }
-html.day .text-dusty-teal { color: #245b5e !important; }
+html.day .landscape-overlay { opacity: 0.85; }
+html.night .landscape-overlay { opacity: 1; }
 
-html.day .border-white\/10 { border-color: rgba(36, 28, 20, 0.14) !important; }
-html.day .border-white\/30 { border-color: rgba(36, 28, 20, 0.25) !important; }
-
-/* Custom classes carry their own white, so utilities alone miss them */
-html.day .nav-link { color: rgba(36, 28, 20, 0.78); }
-html.day .nav-link:hover { color: #245b5e; }
-html.day .nav-mobile-link { color: rgba(36, 28, 20, 0.85); }
-html.day .nav-mobile-overlay { background: rgba(250, 247, 240, 0.97); }
-html.day .quote-text { color: rgba(36, 28, 20, 0.82) !important; }
-html.day .translate-hint { color: rgba(36, 28, 20, 0.45); }
-html.day .avila-now { color: rgba(36, 28, 20, 0.5); }
-html.day .bg-black\/60 { background-color: rgba(252, 250, 245, 0.82) !important; }
-
-/* The cards. The page-scoped rules in personal/professional/socials are
-   !important, so matching them needs both the extra html.day specificity
-   and !important of our own - otherwise the cards stay dark. */
-html.day .card,
-html.day .page-card .card,
-html.day .home-card {
-  background: rgba(255, 253, 248, 0.88) !important;
-  border-color: rgba(74, 55, 40, 0.2) !important;
-  box-shadow: 0 6px 26px rgba(74, 55, 40, 0.1);
+/* Cards lighten just enough to feel like daytime while staying dark
+   enough for white text to hold */
+html.day .card {
+  background: linear-gradient(135deg, rgba(96, 104, 116, 0.78) 0%, rgba(74, 80, 92, 0.84) 100%);
+  border-color: rgba(200, 210, 225, 0.22);
 }
-
-html.day .card:hover {
-  border-color: rgba(36, 91, 94, 0.45) !important;
-  box-shadow: 0 10px 32px rgba(74, 55, 40, 0.16);
-}
-
-html.day .card-teal { border-color: rgba(36, 91, 94, 0.35) !important; }
-html.day .card-sage { border-color: rgba(80, 104, 72, 0.35) !important; }
-html.day .card-caramel { border-color: rgba(150, 100, 58, 0.35) !important; }
-html.day .card-tan { border-color: rgba(130, 108, 82, 0.35) !important; }
 
 html.day .nav-button {
-  background: rgba(255, 253, 248, 0.9);
-  border-color: rgba(74, 55, 40, 0.22);
-  color: #241c14;
+  background: rgba(96, 104, 116, 0.5);
+  border-color: rgba(200, 210, 225, 0.28);
 }
-
-html.day .nav-button:hover {
-  background: rgba(255, 255, 253, 0.98);
-  border-color: rgba(36, 91, 94, 0.5);
-}
-
-/* Mute that busy landscape instead of revealing it. Turning the scrim off
-   entirely was the mistake - text ended up sitting on mountains. */
-html.day .black-overlay {
-  background: rgba(252, 250, 245, 0.55);
-  opacity: 1 !important;
-}
-
-html.day .landscape-overlay {
-  background: linear-gradient(
-    135deg,
-    rgba(252, 250, 245, 0.6) 0%,
-    rgba(248, 246, 238, 0.52) 50%,
-    rgba(245, 240, 230, 0.62) 100%
-  );
-}
-
-html.day .landscape-bg { filter: saturate(0.72) brightness(1.06); }
-html.day .water-pool { opacity: 0.28; }
-
-html.day ::-webkit-scrollbar-track { background: rgba(74, 55, 40, 0.08); }
-html.day ::-webkit-scrollbar-thumb { background: rgba(74, 55, 40, 0.3); }
 
 /* Konami mode is a storm - it forces night regardless of the clock */
-html.spooky.day body { color: rgba(255, 255, 255, 0.92); }
 html.spooky body {
   background: linear-gradient(180deg, #10131c 0%, #0b0b0f 55%, #08080a 100%);
   filter: saturate(0.55) brightness(0.82) contrast(1.08);
@@ -1562,12 +1507,6 @@ html.spooky body {
   background: rgba(90, 74, 140, 0.7);
   border-color: rgba(190, 175, 245, 0.6);
   box-shadow: 0 0 16px rgba(170, 150, 240, 0.5);
-}
-
-html.day .storm-toggle {
-  background: rgba(255, 253, 248, 0.7);
-  border-color: rgba(74, 55, 40, 0.25);
-  color: rgba(36, 28, 20, 0.6);
 }
 
 /* Feedback for a poke, so the five-poke easter egg is discoverable */

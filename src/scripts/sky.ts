@@ -51,10 +51,12 @@ export function onSky(fn: (sky: Sky) => void) {
 
 type Stops = [number[], number[], number[]];
 
-const DAY_CLEAR: Stops    = [[188, 216, 239], [231, 226, 213], [221, 210, 189]];
-const DAY_OVERCAST: Stops = [[185, 192, 198], [211, 211, 208], [201, 198, 189]];
-const NIGHT_CLEAR: Stops  = [[10, 13, 24],    [10, 10, 10],    [8, 8, 10]];
-const NIGHT_OVERCAST: Stops = [[16, 19, 28],  [13, 13, 16],    [10, 10, 12]];
+/* Day is an airier slate, not a light theme - white text still has to read
+   against it. Night is the deep black the site was designed in. */
+const DAY_CLEAR: Stops      = [[74, 92, 112], [46, 50, 57], [33, 34, 37]];
+const DAY_OVERCAST: Stops   = [[64, 70, 78],  [43, 44, 47], [31, 31, 33]];
+const NIGHT_CLEAR: Stops    = [[10, 13, 24],  [10, 10, 10], [8, 8, 10]];
+const NIGHT_OVERCAST: Stops = [[16, 19, 28],  [13, 13, 16], [10, 10, 12]];
 
 function blend(a: number[], b: number[], t: number) {
   return a.map((v, i) => Math.round(v + (b[i] - v) * t));
